@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  
+  /* Custom theme colors for defect tracker */
+  --color-todo: #f59e0b;
+  --color-todo-bg: #fffbeb;
+  --color-in-progress: #3b82f6;
+  --color-in-progress-bg: #eff6ff;
+  --color-done: #10b981;
+  --color-done-bg: #ecfdf5;
+  --color-border: #e5e7eb;
+  --color-card: #ffffff;
+  --color-muted: #6b7280;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Custom colors */
+  --color-todo: var(--color-todo);
+  --color-todo-bg: var(--color-todo-bg);
+  --color-in-progress: var(--color-in-progress);
+  --color-in-progress-bg: var(--color-in-progress-bg);
+  --color-done: var(--color-done);
+  --color-done-bg: var(--color-done-bg);
+  --color-border: var(--color-border);
+  --color-card: var(--color-card);
+  --color-muted: var(--color-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --color-todo-bg: #451a03;
+    --color-in-progress-bg: #1e3a8a;
+    --color-done-bg: #064e3b;
+    --color-border: #374151;
+    --color-card: #1f2937;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Kanban board specific styles */
+.kanban-column {
+  min-height: 200px;
+}
+
+.dragging {
+  opacity: 0.5;
+}
