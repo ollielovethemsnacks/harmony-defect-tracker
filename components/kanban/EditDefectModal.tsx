@@ -105,13 +105,13 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
   const [standardReference, setStandardReference] = useState(() =>
     defect.standardReference || '',
   );
-  const [severity, setSeverity] = useState<DefectSeverity>(() => defect.severity);
+  const [severity, setSeverity] = useState<DefectSeverity | null>(() => defect.severity ?? null);
 
   const [existingImages, setExistingImages] = useState<string[]>(() =>
     defect.images || [],
   );
   const [notesHistory, setNotesHistory] = useState<NotesEntry[]>(() =>
-    parseNotesHistory(defect.notes),
+    parseNotesHistory(defect.notes ?? null),
   );
   const [newNoteText, setNewNoteText] = useState('');
 
@@ -144,9 +144,9 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
     setDescription(defect.description);
     setLocation(defect.location);
     setStandardReference(defect.standardReference || '');
-    setSeverity(defect.severity);
+    setSeverity(defect.severity ?? null);
     setExistingImages(defect.images || []);
-    setNotesHistory(parseNotesHistory(defect.notes));
+    setNotesHistory(parseNotesHistory(defect.notes ?? null));
     setNewNoteText('');
     setFieldErrors({});
     setTouched({});
@@ -184,7 +184,7 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
         d: string,
         l: string,
         sr: string,
-        sev: DefectSeverity,
+        sev: DefectSeverity | null,
         imgs: string[],
       ) => {
         const payload: Record<string, unknown> = {
@@ -192,7 +192,7 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
           description: d,
           location: l,
           standardReference: sr,
-          severity: sev,
+          severity: sev ?? undefined,
           images: imgs.length > 0 ? imgs : undefined,
         };
         return payload;
@@ -620,8 +620,8 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                 </label>
                 <select
                   id="edit-defect-severity"
-                  value={severity}
-                  onChange={(e) => setSeverity(e.target.value as DefectSeverity)}
+                  value={severity ?? ''}
+                  onChange={(e) => setSeverity(e.target.value as DefectSeverity || null)}
                   onBlur={() => handleBlur('severity')}
                   disabled={loading}
                   tabIndex={5}
