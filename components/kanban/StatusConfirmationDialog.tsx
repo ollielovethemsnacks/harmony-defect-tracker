@@ -86,35 +86,53 @@ export function StatusConfirmationDialog({
       // Store the element that had focus before dialog opened
       previousActiveElement.current = document.activeElement as HTMLElement;
 
-      setVisible(true);
+      // Use setTimeout to defer state updates outside of synchronous effect body
+      const visibilityTimeout = setTimeout(() => {
+        setVisible(true);
+      }, 0);
 
       // If user prefers reduced motion, skip animation and focus immediately
       if (prefersReducedMotion) {
-        setAnimating(true);
-        cancelBtnRef.current?.focus();
+        const animTimeout = setTimeout(() => {
+          setAnimating(true);
+          cancelBtnRef.current?.focus();
+        }, 0);
+        return () => {
+          clearTimeout(visibilityTimeout);
+          clearTimeout(animTimeout);
+        };
       } else {
         // Trigger enter animation on next frame
-        requestAnimationFrame(() => {
+        const rafId = requestAnimationFrame(() => {
           setAnimating(true);
         });
 
         // Focus the cancel button after animation starts
-        const timer = setTimeout(() => {
+        const focusTimer = setTimeout(() => {
           cancelBtnRef.current?.focus();
         }, 50);
 
-        return () => clearTimeout(timer);
+        return () => {
+          clearTimeout(visibilityTimeout);
+          cancelAnimationFrame(rafId);
+          clearTimeout(focusTimer);
+        };
       }
     } else if (visible) {
-      // Trigger exit animation
-      setAnimating(false);
+      // Trigger exit animation (deferred to avoid setState in effect body)
+      const animTimeout = setTimeout(() => {
+        setAnimating(false);
+      }, 0);
 
       // After exit animation completes, hide
       const timer = setTimeout(() => {
         setVisible(false);
       }, prefersReducedMotion ? 10 : 200);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(animTimeout);
+        clearTimeout(timer);
+      };
     }
   }, [isOpen, visible, prefersReducedMotion]);
 

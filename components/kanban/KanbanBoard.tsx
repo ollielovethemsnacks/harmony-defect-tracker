@@ -12,7 +12,20 @@ export function KanbanBoard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDefects();
+    let cancelled = false;
+    const doFetch = async () => {
+      try {
+        const res = await fetch('/api/defects');
+        const data = await res.json();
+        if (!cancelled && data.success) setDefects(data.data);
+      } catch (error) {
+        if (!cancelled) console.error('Failed to fetch defects:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    doFetch();
+    return () => { cancelled = true; };
   }, []);
 
   const fetchDefects = async () => {
@@ -22,8 +35,6 @@ export function KanbanBoard() {
       if (data.success) setDefects(data.data);
     } catch (error) {
       console.error('Failed to fetch defects:', error);
-    } finally {
-      setLoading(false);
     }
   };
 

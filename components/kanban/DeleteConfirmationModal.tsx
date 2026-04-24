@@ -42,8 +42,6 @@ export function DeleteConfirmationModal({
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setConfirmText('');
-      setIsDeleting(false);
       document.body.style.overflow = 'hidden';
       // Focus the input when modal opens
       requestAnimationFrame(() => {
@@ -55,6 +53,18 @@ export function DeleteConfirmationModal({
     return () => {
       document.body.style.overflow = '';
     };
+  }, [isOpen]);
+
+  // Reset form state when modal opens (using a separate effect to avoid setState in effect body)
+  useEffect(() => {
+    if (isOpen) {
+      // Use setTimeout to defer state updates outside of the synchronous effect body
+      const timeoutId = setTimeout(() => {
+        setConfirmText('');
+        setIsDeleting(false);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
   }, [isOpen]);
 
   // Keyboard handler

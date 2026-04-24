@@ -21,6 +21,20 @@ export function ImageUpload({ onUpload, existingImages = [], maxFiles = 10 }: Im
   const [isDragActive, setIsDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const handleFiles = useCallback((newFiles: File[]) => {
+    const imageFiles = newFiles.filter(file => file.type.startsWith('image/'));
+    const remainingSlots = maxFiles - files.length - uploadedUrls.length;
+    const filesToAdd = imageFiles.slice(0, remainingSlots);
+
+    const uploadingFiles = filesToAdd.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      uploading: false,
+    }));
+
+    setFiles(prev => [...prev, ...uploadingFiles]);
+  }, [files.length, maxFiles, uploadedUrls.length]);
+
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,7 +59,7 @@ export function ImageUpload({ onUpload, existingImages = [], maxFiles = 10 }: Im
 
     const droppedFiles = Array.from(e.dataTransfer.files);
     handleFiles(droppedFiles);
-  }, []);
+  }, [handleFiles]);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -53,21 +67,7 @@ export function ImageUpload({ onUpload, existingImages = [], maxFiles = 10 }: Im
     if (inputRef.current) {
       inputRef.current.value = '';
     }
-  }, []);
-
-  const handleFiles = (newFiles: File[]) => {
-    const imageFiles = newFiles.filter(file => file.type.startsWith('image/'));
-    const remainingSlots = maxFiles - files.length - uploadedUrls.length;
-    const filesToAdd = imageFiles.slice(0, remainingSlots);
-
-    const uploadingFiles = filesToAdd.map(file => ({
-      file,
-      preview: URL.createObjectURL(file),
-      uploading: false,
-    }));
-
-    setFiles(prev => [...prev, ...uploadingFiles]);
-  };
+  }, [handleFiles]);
 
   const uploadFiles = async () => {
     const urls: string[] = [];

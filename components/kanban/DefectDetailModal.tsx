@@ -29,6 +29,7 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
   const modalRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
+
   // Focus management: move focus to close button when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -114,20 +115,6 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
 
   // ─── Status Change Handlers ──────────────────────────────────────────
 
-  const handleStatusSelect = useCallback(
-    (newStatus: DefectStatus) => {
-      if (!defect || newStatus === defect.status) return;
-
-      if (requiresStatusConfirmation(defect.status, newStatus)) {
-        setPendingStatus(newStatus);
-        setShowConfirmation(true);
-      } else {
-        executeStatusChange(newStatus);
-      }
-    },
-    [defect],
-  );
-
   const executeStatusChange = useCallback(
     async (newStatus: DefectStatus) => {
       if (!defect) return;
@@ -181,7 +168,47 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
             {
               label: 'Retry',
               variant: 'primary' as const,
-              onClick: () => executeStatusChange(newStatus),
+              onClick: () => {
+                // Inline retry logic to avoid recursive reference issues
+                if (!defect) return;
+                const retryStatus = newStatus;
+                setIsStatusUpdating(true);
+                setShowConfirmation(false);
+                const optimisticDefect = { ...defect, status: retryStatus };
+                onStatusChange?.(optimisticDefect);
+                setStatusAnnouncement(`Status changed to ${statusMetadata[retryStatus].label}`);
+                fetch(`/api/defects/${defect.id}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ status: retryStatus }),
+                })
+                  .then(response => {
+                    if (!response.ok) throw new Error(`Server returned ${response.status}`);
+                    return response.json();
+                  })
+                  .then(result => {
+                    if (!result.success) throw new Error(result.error || 'Failed to update status');
+                    if (result.data) onStatusChange?.(result.data);
+                    showToast({
+                      message: `Status updated to ${statusMetadata[retryStatus].label}`,
+                      type: 'success',
+                      duration: 4000,
+                    });
+                  })
+                  .catch(err => {
+                    onStatusChange?.({ ...defect, status: defect.status });
+                    const errorMessage = err instanceof Error ? err.message : 'Network error';
+                    showToast({
+                      message: `Failed to update status: ${errorMessage}`,
+                      type: 'error',
+                      duration: 8000,
+                    });
+                  })
+                  .finally(() => {
+                    setIsStatusUpdating(false);
+                    setPendingStatus(null);
+                  });
+              },
             },
           ],
         });
@@ -191,6 +218,20 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
       }
     },
     [defect, onStatusChange, showToast],
+  );
+
+  const handleStatusSelect = useCallback(
+    (newStatus: DefectStatus) => {
+      if (!defect || newStatus === defect.status) return;
+
+      if (requiresStatusConfirmation(defect.status, newStatus)) {
+        setPendingStatus(newStatus);
+        setShowConfirmation(true);
+      } else {
+        executeStatusChange(newStatus);
+      }
+    },
+    [defect, executeStatusChange],
   );
 
   const openLightbox = (index: number) => {

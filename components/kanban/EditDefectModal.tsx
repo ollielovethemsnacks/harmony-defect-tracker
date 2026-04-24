@@ -98,19 +98,19 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
   const titleRef = useRef<HTMLInputElement>(null);
 
   // ─── Form state (initialised from defect) ────────────────────────────────
-
-  const [title, setTitle] = useState(defect.title);
-  const [description, setDescription] = useState(defect.description);
-  const [location, setLocation] = useState(defect.location);
-  const [standardReference, setStandardReference] = useState(
+  // Initialize state from defect when modal opens (using lazy initialization pattern)
+  const [title, setTitle] = useState(() => defect.title);
+  const [description, setDescription] = useState(() => defect.description);
+  const [location, setLocation] = useState(() => defect.location);
+  const [standardReference, setStandardReference] = useState(() =>
     defect.standardReference || '',
   );
-  const [severity, setSeverity] = useState<DefectSeverity>(defect.severity);
+  const [severity, setSeverity] = useState<DefectSeverity>(() => defect.severity);
 
-  const [existingImages, setExistingImages] = useState<string[]>(
+  const [existingImages, setExistingImages] = useState<string[]>(() =>
     defect.images || [],
   );
-  const [notesHistory, setNotesHistory] = useState<NotesEntry[]>(
+  const [notesHistory, setNotesHistory] = useState<NotesEntry[]>(() =>
     parseNotesHistory(defect.notes),
   );
   const [newNoteText, setNewNoteText] = useState('');
@@ -119,23 +119,6 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-
-  // ─── Sync form state when defect changes ────────────────────────────────
-
-  useEffect(() => {
-    if (isOpen) {
-      setTitle(defect.title);
-      setDescription(defect.description);
-      setLocation(defect.location);
-      setStandardReference(defect.standardReference || '');
-      setSeverity(defect.severity);
-      setExistingImages(defect.images || []);
-      setNotesHistory(parseNotesHistory(defect.notes));
-      setNewNoteText('');
-      setFieldErrors({});
-      setTouched({});
-    }
-  }, [defect, isOpen]);
 
   // ─── Auto-focus first field when modal opens ────────────────────────────
 
@@ -154,22 +137,6 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
     };
   }, [isOpen]);
 
-  // ─── Escape key handler ──────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (!isOpen || loading) return;
-
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        handleClose();
-      }
-    };
-
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, loading]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // ─── Reset form to original defect values ────────────────────────────────
 
   const resetForm = useCallback(() => {
@@ -187,10 +154,26 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
 
   // ─── Close handler (reset + close) ───────────────────────────────────────
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     resetForm();
     onClose();
-  }, [resetForm, onClose]);
+  };
+
+  // ─── Escape key handler ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!isOpen || loading) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen, loading, handleClose]);
 
   // ─── Memoized validation payload builder ────────────────────────────────
 

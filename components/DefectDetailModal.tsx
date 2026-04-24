@@ -18,11 +18,28 @@ export function DefectDetailModal({ defect, isOpen, onClose, onUpdate }: DefectD
   const [activeTab, setActiveTab] = useState<'details' | 'images' | 'comments'>('details');
 
   useEffect(() => {
-    if (defect && isOpen) {
-      fetchComments();
-    }
+    if (!defect || !isOpen) return;
+    
+    // Fetch comments - state updates happen in async callback, not synchronous effect body
+    let cancelled = false;
+    const doFetch = async () => {
+      try {
+        const res = await fetch(`/api/defects/${defect.id}/comments`);
+        const data = await res.json();
+        if (!cancelled && data.success) {
+          setComments(data.data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Failed to fetch comments:', error);
+        }
+      }
+    };
+    doFetch();
+    return () => { cancelled = true; };
   }, [defect, isOpen]);
 
+  // Helper to fetch comments (used by handleAddComment)
   const fetchComments = async () => {
     if (!defect) return;
     try {

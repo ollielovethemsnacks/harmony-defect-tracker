@@ -9,19 +9,16 @@ interface PasscodeGateProps {
 }
 
 export function PasscodeGate({ children }: PasscodeGateProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Initialize from sessionStorage synchronously during render
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('harmony-auth') === 'true';
+    }
+    return false;
+  });
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if already authenticated in session
-    const authStatus = sessionStorage.getItem('harmony-auth');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -119,22 +119,6 @@ export function CreateDefectModal({ isOpen, onClose, onCreate }: CreateDefectMod
     }
   }, [isOpen]);
 
-  // ─── Escape key handler ──────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (!isOpen || loading) return;
-
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        handleClose();
-      }
-    };
-
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, loading]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // ─── Reset form ──────────────────────────────────────────────────────────
 
   const resetForm = useCallback(() => {
@@ -151,10 +135,26 @@ export function CreateDefectModal({ isOpen, onClose, onCreate }: CreateDefectMod
 
   // ─── Close handler (reset + close) ───────────────────────────────────────
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     resetForm();
     onClose();
-  }, [resetForm, onClose]);
+  };
+
+  // ─── Escape key handler ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!isOpen || loading) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen, loading, handleClose]);
 
   // ─── Memoized validation payload builder ────────────────────────────────
 

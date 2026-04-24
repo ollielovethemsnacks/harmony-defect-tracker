@@ -19,7 +19,22 @@ export function DefectNotes({ defect }: DefectNotesProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchComments();
+    let cancelled = false;
+    const doFetch = async () => {
+      try {
+        const res = await fetch(`/api/defects/${defect.id}/comments`);
+        const data = await res.json();
+        if (!cancelled && data.success) {
+          setComments(data.data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Failed to fetch comments:', error);
+        }
+      }
+    };
+    doFetch();
+    return () => { cancelled = true; };
   }, [defect.id]);
 
   const fetchComments = async () => {
