@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { defects, NewDefect, statusEnum } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Validation schema for updating a defect
@@ -12,7 +12,9 @@ const updateDefectSchema = z.object({
   location: z.string().max(255).optional(),
   standardReference: z.string().max(255).optional(),
   status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
+  severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
   images: z.array(z.string()).optional(),
+  notes: z.string().optional(),
 });
 
 // Helper function to validate UUID
@@ -21,7 +23,7 @@ function isValidUUID(uuid: string): boolean {
   return uuidRegex.test(uuid);
 }
 
-// GET /api/defects/[id] - Get single defect
+// GET /api/defects/[id] - Get single non-deleted defect
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -37,7 +39,10 @@ export async function GET(
     }
 
     const defect = await db.query.defects.findFirst({
-      where: eq(defects.id, id),
+      where: (defects, { and }) => and(
+        eq(defects.id, id),
+        isNull(defects.deletedAt)
+      ),
     });
 
     if (!defect) {
@@ -83,9 +88,12 @@ export async function PATCH(
       );
     }
 
-    // Check if defect exists
+    // Check if defect exists and is not deleted
     const existingDefect = await db.query.defects.findFirst({
-      where: eq(defects.id, id),
+      where: (defects, { and }) => and(
+        eq(defects.id, id),
+        isNull(defects.deletedAt)
+      ),
     });
 
     if (!existingDefect) {
@@ -116,7 +124,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/defects/[id] - Delete defect
+// DELETE /api/defects/[id] - Soft delete defect (archive)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -131,9 +139,12 @@ export async function DELETE(
       );
     }
 
-    // Check if defect exists
+    // Check if defect exists and is not already deleted
     const existingDefect = await db.query.defects.findFirst({
-      where: eq(defects.id, id),
+      where: (defects, { and }) => and(
+        eq(defects.id, id),
+        isNull(defects.deletedAt)
+      ),
     });
 
     if (!existingDefect) {
@@ -143,9 +154,22 @@ export async function DELETE(
       );
     }
 
-    await db.delete(defects).where(eq(defects.id, id));
+    // Soft delete by setting deletedAt timestamp
+    const [deletedDefect] = await db
+      .update(defects)
+      .set({
+        deletedAt: new Date(),
+        deletedBy: 'user', // TODO: Use actual user when auth is implemented
+        updatedAt: new Date(),
+      })
+      .where(eq(defects.id, id))
+      .returning();
 
-    return NextResponse.json({ success: true, message: 'Defect deleted successfully' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Defect archived successfully',
+      data: deletedDefect 
+    });
   } catch (error) {
     console.error('Error deleting defect:', error);
     return NextResponse.json(

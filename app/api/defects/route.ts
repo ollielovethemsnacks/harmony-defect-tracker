@@ -2,24 +2,55 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { defects, NewDefect, statusEnum } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Validation schema for creating a defect
 const createDefectSchema = z.object({
-  defectNumber: z.string().min(1).max(50),
   title: z.string().min(1).max(255),
   description: z.string().optional(),
   location: z.string().max(255).optional(),
   standardReference: z.string().max(255).optional(),
   status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
+  severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
   images: z.array(z.string()).optional(),
+  notes: z.string().optional(),
 });
 
-// GET /api/defects - List all defects
+// Helper to generate next defect number
+async function generateDefectNumber(): Promise<string> {
+  const year = new Date().getFullYear();
+  const { defectNumberSequences } = await import('@/lib/db/schema');
+  
+  // Try to get existing sequence for this year
+  let sequence = await db.query.defectNumberSequences.findFirst({
+    where: (seq, { eq }) => eq(seq.year, year),
+  });
+  
+  if (!sequence) {
+    // Create new sequence for this year
+    const [newSeq] = await db.insert(defectNumberSequences)
+      .values({ year, lastNumber: 1 })
+      .returning();
+    sequence = newSeq;
+    return `DF-${year}-0001`;
+  }
+  
+  // Increment sequence
+  const nextNumber = sequence.lastNumber + 1;
+  await db.update(defectNumberSequences)
+    .set({ lastNumber: nextNumber, updatedAt: new Date() })
+    .where(eq(defectNumberSequences.id, sequence.id));
+  
+  const paddedNumber = nextNumber.toString().padStart(4, '0');
+  return `DF-${year}-${paddedNumber}`;
+}
+
+// GET /api/defects - List all non-deleted defects
 export async function GET(): Promise<NextResponse> {
   try {
     const allDefects = await db.query.defects.findMany({
+      where: isNull(defects.deletedAt),
       orderBy: desc(defects.createdAt),
     });
 
@@ -47,14 +78,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // Generate defect number
+    const defectNumber = await generateDefectNumber();
+
     const defectData: NewDefect = {
-      defectNumber: validationResult.data.defectNumber,
+      defectNumber,
       title: validationResult.data.title,
       description: validationResult.data.description ?? null,
       location: validationResult.data.location ?? null,
       standardReference: validationResult.data.standardReference ?? null,
       status: validationResult.data.status ?? 'TODO',
+      severity: validationResult.data.severity ?? 'MEDIUM',
       images: validationResult.data.images ?? [],
+      notes: validationResult.data.notes ?? null,
     };
 
     const [newDefect] = await db.insert(defects).values(defectData).returning();

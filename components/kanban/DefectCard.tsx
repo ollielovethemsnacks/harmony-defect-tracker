@@ -33,22 +33,52 @@ export function DefectCard({ defect, onClick }: DefectCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
       {...attributes}
-      onClick={handleClick}
-      className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow relative w-full max-w-full overflow-hidden"
     >
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-xs font-mono text-gray-500">{defect.defectNumber}</span>
-        <span className={`text-xs px-2 py-1 rounded-full ${statusColors[defect.status]}`}>
-          {defect.status.replace('_', ' ')}
-        </span>
+      {/* Drag handle - only this area initiates drag */}
+      <div
+        {...listeners}
+        className="absolute top-2 right-2 p-1.5 rounded cursor-grab hover:bg-gray-100 active:cursor-grabbing text-gray-400 hover:text-gray-600 z-10"
+        title="Drag to move"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="9" cy="12" r="1" />
+          <circle cx="9" cy="5" r="1" />
+          <circle cx="9" cy="19" r="1" />
+          <circle cx="15" cy="12" r="1" />
+          <circle cx="15" cy="5" r="1" />
+          <circle cx="15" cy="19" r="1" />
+        </svg>
       </div>
-      <h3 className="font-medium text-gray-900 mb-1">{defect.title}</h3>
-      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{defect.description}</p>
-      <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>📍 {defect.location}</span>
-        {defect.images?.length > 0 && <span>📷 {defect.images.length}</span>}
+
+      {/* Card content - clicking here opens the modal */}
+      <div
+        onClick={handleClick}
+        className="p-4 cursor-pointer"
+      >
+        <div className="flex items-start justify-between mb-2 pr-8">
+          <span className="text-xs font-mono text-gray-500">{defect.defectNumber}</span>
+          <span className={`text-xs px-2 py-1 rounded-full ${statusColors[defect.status]}`}>
+            {defect.status.replace('_', ' ')}
+          </span>
+        </div>
+        <h3 className="font-medium text-gray-900 mb-1">{defect.title}</h3>
+        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{defect.description}</p>
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>📍 {defect.location}</span>
+          {defect.images?.length > 0 && <span>📷 {defect.images.length}</span>}
+        </div>
       </div>
     </div>
   );

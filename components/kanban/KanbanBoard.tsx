@@ -36,7 +36,17 @@ export function KanbanBoard() {
       }
     };
     doFetch();
-    return () => { cancelled = true; };
+    
+    // Listen for defect-restored events to refresh the board
+    const handleDefectRestored = () => {
+      fetchDefects();
+    };
+    window.addEventListener('defect-restored', handleDefectRestored);
+    
+    return () => { 
+      cancelled = true; 
+      window.removeEventListener('defect-restored', handleDefectRestored);
+    };
   }, []);
 
   const fetchDefects = async () => {

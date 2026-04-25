@@ -28,13 +28,13 @@ export function KanbanColumn({ status, defects, onDefectClick }: KanbanColumnPro
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 min-w-[300px] rounded-lg border-2 ${columnColors[status]} p-4`}
+      className={`flex-1 min-w-[300px] max-w-[400px] rounded-lg border-2 ${columnColors[status]} p-4 flex flex-col h-full`}
     >
-      <h2 className="font-semibold text-gray-700 mb-4 flex items-center justify-between">
+      <h2 className="font-semibold text-gray-700 mb-4 flex items-center justify-between flex-shrink-0">
         {columnTitles[status]}
         <span className="bg-white px-2 py-1 rounded-full text-sm">{defects.length}</span>
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-3 overflow-y-auto flex-1 min-h-0">
         {defects.map((defect) => (
           <DefectCard key={defect.id} defect={defect} onClick={onDefectClick} />
         ))}
