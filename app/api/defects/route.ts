@@ -56,57 +56,13 @@ async function generateDefectNumber(): Promise<string> {
 // GET /api/defects - List all non-deleted defects
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const { searchParams } = new URL(request.url);
-    const sortBy = searchParams.get('sortBy') || 'defectNumber';
-    const sortDir = searchParams.get('sortDir') || 'asc';
-
-    let orderByClause;
-    
-    switch (sortBy) {
-      case 'defectNumber':
-        orderByClause = sortDir === 'desc' ? desc(defects.defectNumber) : asc(defects.defectNumber);
-        break;
-      case 'createdAt':
-        orderByClause = sortDir === 'desc' ? desc(defects.createdAt) : asc(defects.createdAt);
-        break;
-      case 'updatedAt':
-        orderByClause = sortDir === 'desc' ? desc(defects.updatedAt) : asc(defects.updatedAt);
-        break;
-      case 'severity':
-        // Custom severity ordering: CRITICAL=3, HIGH=2, MEDIUM=1, LOW=0
-        orderByClause = sortDir === 'desc' 
-          ? desc(sql`CASE ${defects.severity} WHEN 'CRITICAL' THEN 3 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 1 WHEN 'LOW' THEN 0 ELSE -1 END`)
-          : asc(sql`CASE ${defects.severity} WHEN 'CRITICAL' THEN 3 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 1 WHEN 'LOW' THEN 0 ELSE -1 END`);
-        break;
-      case 'title':
-        orderByClause = sortDir === 'desc' ? desc(defects.title) : asc(defects.title);
-        break;
-      case 'sortOrder':
-        // Fallback to defectNumber if sortOrder column doesn't exist yet
-        orderByClause = sortDir === 'desc' ? desc(defects.defectNumber) : asc(defects.defectNumber);
-        break;
-      default:
-        orderByClause = asc(defects.defectNumber);
-    }
-
-    let allDefects;
-    try {
-      allDefects = await db.query.defects.findMany({
-        where: isNull(defects.deletedAt),
-        orderBy: orderByClause,
-      });
-    } catch (err) {
-      // Fallback if deletedAt column doesn't exist
-      allDefects = await db.query.defects.findMany({
-        orderBy: orderByClause,
-      });
-    }
-
+    // Simple query without filters - let the database return what it has
+    const allDefects = await db.query.defects.findMany();
     return NextResponse.json({ success: true, data: allDefects });
   } catch (error) {
     console.error('Error fetching defects:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch defects' },
+      { success: false, error: 'Failed to fetch defects', details: String(error) },
       { status: 500 }
     );
   }
