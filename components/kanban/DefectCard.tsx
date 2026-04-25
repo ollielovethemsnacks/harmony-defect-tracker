@@ -36,10 +36,10 @@ export function DefectCard({ defect, onClick }: DefectCardProps) {
       className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow relative w-full overflow-hidden touch-manipulation"
     >
       {/* Drag handle - only this area initiates drag */}
-      {/* Touch-friendly sizing: min 44px tap target on mobile */}
+      {/* Hidden on mobile since drag-and-drop isn't supported on touch devices */}
       <div
         {...listeners}
-        className="absolute top-2 right-2 p-2 sm:p-1.5 rounded cursor-grab hover:bg-gray-100 active:cursor-grabbing text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center sm:min-w-0 sm:min-h-0"
+        className="hidden sm:flex absolute top-2 right-2 p-2 sm:p-1.5 rounded cursor-grab hover:bg-gray-100 active:cursor-grabbing text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] items-center justify-center sm:min-w-0 sm:min-h-0"
         title="Drag to move"
       >
         {/* Responsive icon sizing: larger on mobile for touch */}

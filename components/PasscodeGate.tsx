@@ -9,13 +9,15 @@ interface PasscodeGateProps {
 }
 
 export function PasscodeGate({ children }: PasscodeGateProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    // Initialize from sessionStorage synchronously during render
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('harmony-auth') === 'true';
-    }
-    return false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    // Check localStorage after hydration to avoid SSR mismatch
+    const auth = localStorage.getItem('harmony-auth') === 'true';
+    setIsAuthenticated(auth);
+    setIsHydrated(true);
+  }, []);
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +27,7 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
     setError('');
 
     if (passcode === CORRECT_PASSCODE) {
-      sessionStorage.setItem('harmony-auth', 'true');
+      localStorage.setItem('harmony-auth', 'true');
       setIsAuthenticated(true);
     } else {
       setError('Incorrect passcode. Please try again.');
@@ -34,12 +36,13 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('harmony-auth');
+    localStorage.removeItem('harmony-auth');
     setIsAuthenticated(false);
     setPasscode('');
   };
 
-  if (isLoading) {
+  // Show loading state during hydration to avoid SSR mismatch
+  if (!isHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-gray-600">Loading...</div>
