@@ -20,7 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">
+      {/* Responsive viewport meta is automatically injected by Next.js */}
+      <body className="min-h-full flex flex-col font-sans overflow-x-hidden">
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

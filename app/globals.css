@@ -60,3 +60,71 @@ body {
 .dragging {
   opacity: 0.5;
 }
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Touch-friendly tap targets */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on drag handles */
+.cursor-grab {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Smooth scrolling for kanban columns on mobile */
+@media (max-width: 639px) {
+  .kanban-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .kanban-scroll > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* Responsive modal sizing */
+@layer utilities {
+  /* Mobile-first modal: full screen on small devices */
+  .modal-mobile-full {
+    @apply fixed inset-0 z-50 flex items-start justify-center p-0 sm:p-4 bg-black/50 overflow-y-auto;
+  }
+  
+  .modal-content-mobile {
+    @apply relative bg-white rounded-none sm:rounded-lg shadow-xl w-full sm:max-w-2xl sm:my-8 mx-auto min-h-screen sm:min-h-0;
+  }
+}
+
+/* Ensure proper viewport sizing on mobile */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+}
+
+/* Responsive typography scale */
+@layer base {
+  html {
+    font-size: 14px;
+  }
+  
+  @media (min-width: 640px) {
+    html {
+      font-size: 16px;
+    }
+  }
+}
+
+/* Touch-friendly button sizing on mobile */
+@media (max-width: 639px) {
+  button,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

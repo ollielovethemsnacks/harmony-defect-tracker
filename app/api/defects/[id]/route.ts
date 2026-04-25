@@ -15,6 +15,7 @@ const updateDefectSchema = z.object({
   severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
   images: z.array(z.string()).optional(),
   notes: z.string().optional(),
+  sortOrder: z.number().optional(),
 });
 
 // Helper function to validate UUID

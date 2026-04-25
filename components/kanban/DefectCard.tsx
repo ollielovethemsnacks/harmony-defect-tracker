@@ -15,13 +15,12 @@ const statusColors: Record<DefectStatus, string> = {
 };
 
 export function DefectCard({ defect, onClick }: DefectCardProps) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: defect.id,
   });
 
-  const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-    : undefined;
+  // When using DragOverlay, we don't need transform on the original element
+  // The DragOverlay renders the floating preview separately
 
   const handleClick = () => {
     if (onClick) {
@@ -32,20 +31,21 @@ export function DefectCard({ defect, onClick }: DefectCardProps) {
   return (
     <div
       ref={setNodeRef}
-      style={style}
+
       {...attributes}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow relative w-full max-w-full overflow-hidden"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow relative w-full overflow-hidden touch-manipulation"
     >
       {/* Drag handle - only this area initiates drag */}
+      {/* Touch-friendly sizing: min 44px tap target on mobile */}
       <div
         {...listeners}
-        className="absolute top-2 right-2 p-1.5 rounded cursor-grab hover:bg-gray-100 active:cursor-grabbing text-gray-400 hover:text-gray-600 z-10"
+        className="absolute top-2 right-2 p-2 sm:p-1.5 rounded cursor-grab hover:bg-gray-100 active:cursor-grabbing text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center sm:min-w-0 sm:min-h-0"
         title="Drag to move"
       >
+        {/* Responsive icon sizing: larger on mobile for touch */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
+          className="w-5 h-5 sm:w-4 sm:h-4"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -63,20 +63,24 @@ export function DefectCard({ defect, onClick }: DefectCardProps) {
       </div>
 
       {/* Card content - clicking here opens the modal */}
+      {/* Responsive padding and font sizes */}
       <div
         onClick={handleClick}
-        className="p-4 cursor-pointer"
+        className="p-3 sm:p-4 cursor-pointer"
       >
-        <div className="flex items-start justify-between mb-2 pr-8">
-          <span className="text-xs font-mono text-gray-500">{defect.defectNumber}</span>
-          <span className={`text-xs px-2 py-1 rounded-full ${statusColors[defect.status]}`}>
+        <div className="flex items-start justify-between mb-2 pr-10 sm:pr-8">
+          <span className="text-[10px] sm:text-xs font-mono text-gray-500">{defect.defectNumber}</span>
+          <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${statusColors[defect.status]}`}>
             {defect.status.replace('_', ' ')}
           </span>
         </div>
-        <h3 className="font-medium text-gray-900 mb-1">{defect.title}</h3>
-        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{defect.description}</p>
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>📍 {defect.location}</span>
+        {/* Responsive title: slightly smaller on mobile */}
+        <h3 className="font-medium text-sm sm:text-base text-gray-900 mb-1 leading-tight">{defect.title}</h3>
+        {/* Description with responsive line clamp */}
+        <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{defect.description}</p>
+        {/* Footer with location and image count */}
+        <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500">
+          <span className="truncate max-w-[70%]">📍 {defect.location}</span>
           {defect.images?.length > 0 && <span>📷 {defect.images.length}</span>}
         </div>
       </div>

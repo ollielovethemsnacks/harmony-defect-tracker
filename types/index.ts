@@ -14,6 +14,21 @@ export interface Defect {
   images: string[];
   createdAt: string;
   updatedAt: string;
+  sortOrder?: number;
+}
+
+export type SortField = 'defectNumber' | 'createdAt' | 'updatedAt' | 'severity' | 'title' | 'sortOrder';
+export type SortDirection = 'asc' | 'desc';
+
+export interface ColumnSortPreference {
+  columnStatus: DefectStatus;
+  sortField: SortField;
+  sortDirection: SortDirection;
+}
+
+export interface ReorderItem {
+  id: string;
+  sortOrder: number;
 }
 
 export interface Comment {

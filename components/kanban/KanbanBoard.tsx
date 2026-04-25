@@ -1,19 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { useState, useEffect, useCallback } from 'react';
+import { DndContext, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { KanbanColumn } from './KanbanColumn';
 import { DefectDetailModal } from './DefectDetailModal';
 import { CreateDefectModal } from './CreateDefectModal';
 import { EditDefectModal } from './EditDefectModal';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
-import { Defect, DefectStatus } from '@/types';
+import { Defect, DefectStatus, SortField, SortDirection } from '@/types';
 
 const COLUMNS: DefectStatus[] = ['TODO', 'IN_PROGRESS', 'DONE'];
+
+// Default sort preferences for each column
+const defaultSortPreferences: Record<DefectStatus, { field: SortField; direction: SortDirection }> = {
+  TODO: { field: 'defectNumber', direction: 'asc' },
+  IN_PROGRESS: { field: 'defectNumber', direction: 'asc' },
+  DONE: { field: 'defectNumber', direction: 'asc' },
+};
 
 export function KanbanBoard() {
   const [defects, setDefects] = useState<Defect[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortPreferences, setSortPreferences] = useState<Record<DefectStatus, { field: SortField; direction: SortDirection }>>(defaultSortPreferences);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
   
   // Modal states
   const [selectedDefect, setSelectedDefect] = useState<Defect | null>(null);
@@ -21,6 +30,58 @@ export function KanbanBoard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Load sort preferences from localStorage and API on mount
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        // First try to load from localStorage for immediate display
+        const savedPrefs = localStorage.getItem('kanbanSortPreferences');
+        if (savedPrefs) {
+          const parsed = JSON.parse(savedPrefs);
+          setSortPreferences((prev) => ({ ...prev, ...parsed }));
+        }
+
+        // Then fetch from API to get server-side preferences
+        const res = await fetch('/api/column-preferences');
+        const data = await res.json();
+        if (data.success && data.data) {
+          const apiPrefs: Record<DefectStatus, { field: SortField; direction: SortDirection }> = {
+            TODO: { field: 'defectNumber', direction: 'asc' },
+            IN_PROGRESS: { field: 'defectNumber', direction: 'asc' },
+            DONE: { field: 'defectNumber', direction: 'asc' },
+          };
+          
+          for (const [status, pref] of Object.entries(data.data)) {
+            if (pref && typeof pref === 'object' && 'sortField' in pref && 'sortDirection' in pref) {
+              apiPrefs[status as DefectStatus] = {
+                field: pref.sortField as SortField,
+                direction: pref.sortDirection as SortDirection,
+              };
+            }
+          }
+          
+          setSortPreferences(apiPrefs);
+          localStorage.setItem('kanbanSortPreferences', JSON.stringify(apiPrefs));
+        }
+      } catch (error) {
+        console.error('Failed to load sort preferences:', error);
+      }
+    };
+    
+    loadPreferences();
+  }, []);
+
+  // Fetch defects
+  const fetchDefects = useCallback(async () => {
+    try {
+      const res = await fetch('/api/defects');
+      const data = await res.json();
+      if (data.success) setDefects(data.data);
+    } catch (error) {
+      console.error('Failed to fetch defects:', error);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,24 +108,87 @@ export function KanbanBoard() {
       cancelled = true; 
       window.removeEventListener('defect-restored', handleDefectRestored);
     };
-  }, []);
+  }, [fetchDefects]);
 
-  const fetchDefects = async () => {
+  // Sort defects for each column based on its sort preference
+  const getSortedDefects = useCallback((status: DefectStatus) => {
+    const columnDefects = defects.filter((d) => d.status === status);
+    const { field, direction } = sortPreferences[status];
+
+    return [...columnDefects].sort((a, b) => {
+      let comparison = 0;
+
+      switch (field) {
+        case 'defectNumber':
+          comparison = a.defectNumber.localeCompare(b.defectNumber);
+          break;
+        case 'createdAt':
+          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+        case 'updatedAt':
+          comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+          break;
+        case 'severity': {
+          const severityOrder = { CRITICAL: 3, HIGH: 2, MEDIUM: 1, LOW: 0 };
+          const aSev = severityOrder[a.severity || 'MEDIUM'];
+          const bSev = severityOrder[b.severity || 'MEDIUM'];
+          comparison = aSev - bSev;
+          break;
+        }
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'sortOrder':
+          comparison = (a.sortOrder || 0) - (b.sortOrder || 0);
+          break;
+        default:
+          comparison = a.defectNumber.localeCompare(b.defectNumber);
+      }
+
+      return direction === 'desc' ? -comparison : comparison;
+    });
+  }, [defects, sortPreferences]);
+
+  // Handle sort change
+  const handleSortChange = useCallback(async (status: DefectStatus, field: SortField, direction: SortDirection) => {
+    const newPreferences = { ...sortPreferences, [status]: { field, direction } };
+    setSortPreferences(newPreferences);
+    
+    // Save to localStorage for immediate persistence
+    localStorage.setItem('kanbanSortPreferences', JSON.stringify(newPreferences));
+    
+    // Save to API for server-side persistence
     try {
-      const res = await fetch('/api/defects');
-      const data = await res.json();
-      if (data.success) setDefects(data.data);
+      await fetch('/api/column-preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          columnStatus: status,
+          sortField: field,
+          sortDirection: direction,
+        }),
+      });
     } catch (error) {
-      console.error('Failed to fetch defects:', error);
+      console.error('Failed to save sort preference:', error);
     }
+  }, [sortPreferences]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveDragId(null);
+    
     if (!over) return;
 
     const newStatus = over.id as DefectStatus;
     const defectId = active.id as string;
+
+    // Find the defect being moved
+    const defect = defects.find((d) => d.id === defectId);
+    if (!defect || defect.status === newStatus) return;
 
     try {
       await fetch(`/api/defects/${defectId}`, {
@@ -115,14 +239,19 @@ export function KanbanBoard() {
           + New Defect
         </button>
       </div>
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext 
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <div className="flex gap-4 p-4 h-screen">
           {COLUMNS.map((status) => (
             <KanbanColumn
               key={status}
               status={status}
-              defects={defects.filter((d) => d.status === status)}
+              defects={getSortedDefects(status)}
+              currentSort={sortPreferences[status]}
               onDefectClick={handleDefectClick}
+              onSortChange={handleSortChange}
             />
           ))}
         </div>
