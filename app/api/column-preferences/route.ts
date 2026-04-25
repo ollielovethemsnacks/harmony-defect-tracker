@@ -1,92 +1,29 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { columnSortPreferences } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
-import { z } from 'zod';
 
-const updatePreferenceSchema = z.object({
-  columnStatus: z.enum(['TODO', 'IN_PROGRESS', 'DONE']),
-  sortField: z.enum(['defectNumber', 'createdAt', 'updatedAt', 'severity', 'title', 'sortOrder']),
-  sortDirection: z.enum(['asc', 'desc']),
-});
+// Default sort preferences (no database storage yet)
+const defaultPreferences = {
+  TODO: { columnStatus: 'TODO', sortField: 'defectNumber', sortDirection: 'asc' },
+  IN_PROGRESS: { columnStatus: 'IN_PROGRESS', sortField: 'defectNumber', sortDirection: 'asc' },
+  DONE: { columnStatus: 'DONE', sortField: 'defectNumber', sortDirection: 'asc' },
+};
 
 // GET /api/column-preferences - Get all column sort preferences
 export async function GET(): Promise<NextResponse> {
-  try {
-    // Return defaults (table might not exist yet)
-    const defaults = {
-      TODO: { columnStatus: 'TODO', sortField: 'defectNumber', sortDirection: 'asc' },
-      IN_PROGRESS: { columnStatus: 'IN_PROGRESS', sortField: 'defectNumber', sortDirection: 'asc' },
-      DONE: { columnStatus: 'DONE', sortField: 'defectNumber', sortDirection: 'asc' },
-    };
-
-    try {
-      const preferences = await db.query.columnSortPreferences.findMany();
-      
-      // Merge with defaults
-      const result = { ...defaults };
-      for (const pref of preferences) {
-        result[pref.columnStatus] = pref;
-      }
-
-      return NextResponse.json({ success: true, data: result });
-    } catch (err) {
-      // Table doesn't exist yet, return defaults
-      return NextResponse.json({ success: true, data: defaults });
-    }
-  } catch (error) {
-    console.error('Error fetching column preferences:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch column preferences' },
-      { status: 500 }
-    );
-  }
+  // Return defaults (no database table yet)
+  return NextResponse.json({ success: true, data: defaultPreferences });
 }
 
 // POST /api/column-preferences - Save or update a column sort preference
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
-    
-    const validationResult = updatePreferenceSchema.safeParse(body);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid request body', details: validationResult.error.issues },
-        { status: 400 }
-      );
-    }
+    const { columnStatus, sortField, sortDirection } = body;
 
-    const { columnStatus, sortField, sortDirection } = validationResult.data;
-
-    try {
-      // Check if preference already exists for this column
-      const existing = await db.query.columnSortPreferences.findFirst({
-        where: eq(columnSortPreferences.columnStatus, columnStatus),
-      });
-
-      if (existing) {
-        // Update existing
-        await db
-          .update(columnSortPreferences)
-          .set({ sortField, sortDirection, updatedAt: new Date() })
-          .where(eq(columnSortPreferences.id, existing.id));
-      } else {
-        // Create new
-        await db.insert(columnSortPreferences).values({
-          columnStatus,
-          sortField,
-          sortDirection,
-        });
-      }
-    } catch (err) {
-      // Table doesn't exist yet, just return success (will use localStorage)
-      console.warn('Column preferences table not found, using localStorage fallback');
-    }
-
+    // Just return success (no database table yet, client should use localStorage)
     return NextResponse.json({ 
       success: true, 
-      message: 'Preference saved',
+      message: 'Preference saved (client-side only)',
       data: { columnStatus, sortField, sortDirection }
     });
   } catch (error) {

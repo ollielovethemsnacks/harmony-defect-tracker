@@ -1,21 +1,18 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { defects, NewDefect, statusEnum } from '@/lib/db/schema';
-import { eq, isNull } from 'drizzle-orm';
+import { defects, NewDefect } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-// Validation schema for updating a defect
+// Validation schema for updating a defect (minimal - only fields that exist)
 const updateDefectSchema = z.object({
   title: z.string().min(1).max(255).optional(),
   description: z.string().optional(),
   location: z.string().max(255).optional(),
   standardReference: z.string().max(255).optional(),
   status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
-  severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
   images: z.array(z.string()).optional(),
-  notes: z.string().optional(),
-  sortOrder: z.number().optional(),
 });
 
 // Helper function to validate UUID
@@ -24,7 +21,7 @@ function isValidUUID(uuid: string): boolean {
   return uuidRegex.test(uuid);
 }
 
-// GET /api/defects/[id] - Get single non-deleted defect
+// GET /api/defects/[id] - Get single defect
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -40,10 +37,7 @@ export async function GET(
     }
 
     const defect = await db.query.defects.findFirst({
-      where: (defects, { and }) => and(
-        eq(defects.id, id),
-        isNull(defects.deletedAt)
-      ),
+      where: eq(defects.id, id),
     });
 
     if (!defect) {
@@ -89,12 +83,9 @@ export async function PATCH(
       );
     }
 
-    // Check if defect exists and is not deleted
+    // Check if defect exists
     const existingDefect = await db.query.defects.findFirst({
-      where: (defects, { and }) => and(
-        eq(defects.id, id),
-        isNull(defects.deletedAt)
-      ),
+      where: eq(defects.id, id),
     });
 
     if (!existingDefect) {
@@ -125,7 +116,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/defects/[id] - Soft delete defect (archive)
+// DELETE /api/defects/[id] - Delete defect (hard delete for now)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -140,12 +131,9 @@ export async function DELETE(
       );
     }
 
-    // Check if defect exists and is not already deleted
+    // Check if defect exists
     const existingDefect = await db.query.defects.findFirst({
-      where: (defects, { and }) => and(
-        eq(defects.id, id),
-        isNull(defects.deletedAt)
-      ),
+      where: eq(defects.id, id),
     });
 
     if (!existingDefect) {
@@ -155,21 +143,12 @@ export async function DELETE(
       );
     }
 
-    // Soft delete by setting deletedAt timestamp
-    const [deletedDefect] = await db
-      .update(defects)
-      .set({
-        deletedAt: new Date(),
-        deletedBy: 'user', // TODO: Use actual user when auth is implemented
-        updatedAt: new Date(),
-      })
-      .where(eq(defects.id, id))
-      .returning();
+    // Hard delete (soft delete requires deletedAt column)
+    await db.delete(defects).where(eq(defects.id, id));
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Defect archived successfully',
-      data: deletedDefect 
+      message: 'Defect deleted successfully',
     });
   } catch (error) {
     console.error('Error deleting defect:', error);
