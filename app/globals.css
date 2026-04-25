@@ -1,55 +1,108 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  
-  /* Custom theme colors for defect tracker */
+  --background: #fafafa;
+  --foreground: #0f172a;
+
+  /* Refined minimalist palette - Slate based */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+
+  /* Subtle accent colors - muted for minimalist design */
   --color-todo: #f59e0b;
-  --color-todo-bg: #fffbeb;
-  --color-in-progress: #3b82f6;
-  --color-in-progress-bg: #eff6ff;
+  --color-todo-bg: #fef3c7;
+  --color-todo-border: #fcd34d;
+  --color-in-progress: #6366f1;
+  --color-in-progress-bg: #e0e7ff;
+  --color-in-progress-border: #c7d2fe;
   --color-done: #10b981;
-  --color-done-bg: #ecfdf5;
-  --color-border: #e5e7eb;
+  --color-done-bg: #d1fae5;
+  --color-done-border: #a7f3d0;
+
+  /* UI colors */
+  --color-border: #e2e8f0;
   --color-card: #ffffff;
-  --color-muted: #6b7280;
+  --color-card-elevated: #ffffff;
+  --color-muted: #64748b;
+  --color-accent: #0f172a;
+  --color-accent-hover: #1e293b;
+
+  /* Shadows - subtle and refined */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+  --shadow-drag: 0 25px 50px -12px rgb(0 0 0 / 0.15);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  
-  /* Custom colors */
+  --font-sans: var(--font-inter);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Slate scale */
+  --color-slate-50: var(--color-slate-50);
+  --color-slate-100: var(--color-slate-100);
+  --color-slate-200: var(--color-slate-200);
+  --color-slate-300: var(--color-slate-300);
+  --color-slate-400: var(--color-slate-400);
+  --color-slate-500: var(--color-slate-500);
+  --color-slate-600: var(--color-slate-600);
+  --color-slate-700: var(--color-slate-700);
+  --color-slate-800: var(--color-slate-800);
+  --color-slate-900: var(--color-slate-900);
+
+  /* Status colors */
   --color-todo: var(--color-todo);
   --color-todo-bg: var(--color-todo-bg);
+  --color-todo-border: var(--color-todo-border);
   --color-in-progress: var(--color-in-progress);
   --color-in-progress-bg: var(--color-in-progress-bg);
+  --color-in-progress-border: var(--color-in-progress-border);
   --color-done: var(--color-done);
   --color-done-bg: var(--color-done-bg);
+  --color-done-border: var(--color-done-border);
+
+  /* UI colors */
   --color-border: var(--color-border);
   --color-card: var(--color-card);
+  --color-card-elevated: var(--color-card-elevated);
   --color-muted: var(--color-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f172a;
+    --foreground: #f8fafc;
     --color-todo-bg: #451a03;
-    --color-in-progress-bg: #1e3a8a;
+    --color-in-progress-bg: #1e1b4b;
     --color-done-bg: #064e3b;
-    --color-border: #374151;
-    --color-card: #1f2937;
+    --color-border: #334155;
+    --color-card: #1e293b;
+    --color-card-elevated: #334155;
+    --color-slate-100: #1e293b;
+    --color-slate-200: #334155;
+    --color-slate-800: #f1f5f9;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Kanban board specific styles */
@@ -59,4 +112,127 @@ body {
 
 .dragging {
   opacity: 0.5;
+}
+
+/* ============================================
+   MINIMALIST DESIGN SYSTEM
+   ============================================ */
+
+/* Refined card shadow */
+.card-shadow {
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-shadow:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Subtle button styles */
+.btn-subtle {
+  @apply px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg;
+  transition: all 0.15s ease;
+}
+
+.btn-subtle:hover {
+  @apply bg-slate-50 border-slate-300;
+}
+
+/* Primary button */
+.btn-primary {
+  @apply px-4 py-2 text-sm font-medium text-white bg-slate-900 rounded-lg;
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+  @apply bg-slate-800;
+}
+
+/* Status badges - minimalist */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full;
+}
+
+/* Input fields - refined */
+.input-minimal {
+  @apply w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400;
+  transition: all 0.15s ease;
+}
+
+.input-minimal:focus {
+  @apply outline-none border-slate-400 ring-2 ring-slate-100;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Touch-friendly tap targets */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on drag handles */
+.cursor-grab {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Smooth scrolling for kanban columns on mobile */
+@media (max-width: 639px) {
+  .kanban-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .kanban-scroll > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* Responsive modal sizing */
+@layer utilities {
+  /* Mobile-first modal: full screen on small devices */
+  .modal-mobile-full {
+    @apply fixed inset-0 z-50 flex items-start justify-center p-0 sm:p-4 bg-black/50 overflow-y-auto;
+  }
+
+  .modal-content-mobile {
+    @apply relative bg-white rounded-none sm:rounded-xl shadow-xl w-full sm:max-w-2xl sm:my-8 mx-auto min-h-screen sm:min-h-0;
+  }
+}
+
+/* Ensure proper viewport sizing on mobile */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+}
+
+/* Responsive typography scale */
+@layer base {
+  html {
+    font-size: 14px;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: 15px;
+    }
+  }
+}
+
+/* Touch-friendly button sizing on mobile */
+@media (max-width: 639px) {
+  button,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

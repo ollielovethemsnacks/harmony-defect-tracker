@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { defects, NewDefect, statusEnum } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { defects } from '@/lib/db/schema';
+import { eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Validation schema for updating a defect
@@ -12,7 +12,9 @@ const updateDefectSchema = z.object({
   location: z.string().max(255).optional(),
   standardReference: z.string().max(255).optional(),
   status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
+  severity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).optional(),
   images: z.array(z.string()).optional(),
+  notes: z.string().optional(),
 });
 
 // Helper function to validate UUID
@@ -95,7 +97,7 @@ export async function PATCH(
       );
     }
 
-    const updateData: Partial<NewDefect> = {
+    const updateData = {
       ...validationResult.data,
       updatedAt: new Date(),
     };
@@ -116,7 +118,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/defects/[id] - Delete defect
+// DELETE /api/defects/[id] - Soft delete defect
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -143,9 +145,19 @@ export async function DELETE(
       );
     }
 
-    await db.delete(defects).where(eq(defects.id, id));
+    // Soft delete - set deletedAt timestamp
+    await db
+      .update(defects)
+      .set({ 
+        deletedAt: new Date(),
+        deletedBy: 'system', // TODO: Use actual user when auth is implemented
+      })
+      .where(eq(defects.id, id));
 
-    return NextResponse.json({ success: true, message: 'Defect deleted successfully' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Defect deleted successfully',
+    });
   } catch (error) {
     console.error('Error deleting defect:', error);
     return NextResponse.json(

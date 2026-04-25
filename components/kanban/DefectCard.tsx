@@ -2,131 +2,174 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { Defect, DefectStatus } from '@/types';
-import { MapPin, Image as ImageIcon } from 'lucide-react';
-import { useState, useCallback } from 'react';
-import { DefectDetailModal } from './DefectDetailModal';
-import { DeleteConfirmationModal } from './DeleteConfirmationModal';
+import { MapPin, Image as ImageIcon, GripVertical } from 'lucide-react';
 
 interface DefectCardProps {
   defect: Defect;
+  onClick?: (defect: Defect) => void;
+  isOverlay?: boolean;
+  isDragging?: boolean;
 }
 
-const statusColors: Record<DefectStatus, string> = {
-  TODO: 'bg-amber-100 text-amber-800',
-  IN_PROGRESS: 'bg-blue-100 text-blue-800',
-  DONE: 'bg-green-100 text-green-800',
+const statusColors: Record<DefectStatus, { bg: string; text: string; dot: string }> = {
+  TODO: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+  IN_PROGRESS: { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500' },
+  DONE: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
 };
 
-export function DefectCard({ defect }: DefectCardProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: defect.id,
-  });
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-    : undefined;
-
-  // Handle keyboard shortcuts
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      setIsDetailModalOpen(true);
+// Pure visual component - no drag logic at all
+// Used by DragOverlay to render the floating card
+function DefectCardVisual({ defect, onClick, isOverlay }: DefectCardProps) {
+  const handleClick = () => {
+    if (onClick) {
+      onClick(defect);
     }
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      e.preventDefault();
-      setIsDeleteModalOpen(true);
-    }
-  }, []);
-
-  const handleDefectDeleted = () => {
-    // Trigger a refresh by dispatching a custom event
-    window.dispatchEvent(new CustomEvent('defect-deleted', { detail: { defectId: defect.id } }));
   };
 
+  const statusStyle = statusColors[defect.status];
+
   return (
-    <>
-      <div
-        ref={setNodeRef}
-        style={style}
-        {...listeners}
-        {...attributes}
-        onClick={() => setIsDetailModalOpen(true)}
-        onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
-        aria-label={`Defect ${defect.defectNumber}: ${defect.title}. Press Enter to view details, Delete to remove.`}
-        className={`
-          bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-move
-          hover:shadow-md hover:border-gray-300
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-          active:scale-[0.98]
-          transition-all duration-150
-          ${isDragging ? 'opacity-50 rotate-2 scale-105 shadow-xl z-50' : ''}
-        `}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between mb-2">
-          <span className="text-xs font-mono text-gray-500">{defect.defectNumber}</span>
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[defect.status]}`}
-            aria-label={`Status: ${defect.status.replace('_', ' ')}`}
-          >
+    <div
+      className={`bg-white rounded-xl border border-slate-200 transition-all relative overflow-hidden touch-manipulation ${
+        isOverlay
+          ? 'shadow-2xl ring-2 ring-slate-400/50 cursor-grabbing rotate-1 scale-[1.02]'
+          : 'shadow-sm hover:shadow-md hover:border-slate-300'
+      } ${isOverlay ? 'cursor-grabbing' : 'cursor-auto'}`}
+      style={isOverlay ? { width: '320px' } : undefined}
+    >
+      {/* Drag handle - only on non-overlay cards, hidden on mobile */}
+      {!isOverlay && (
+        <div
+          className="hidden sm:flex absolute top-3 right-3 p-1.5 rounded-md text-slate-400 hover:text-slate-600 z-10 items-center justify-center cursor-grab hover:bg-slate-100 active:cursor-grabbing transition-colors"
+          title="Drag to move"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+      )}
+
+      {/* Card content */}
+      <div onClick={handleClick} className="p-4 cursor-pointer">
+        {/* Header: Defect number and status */}
+        <div className="flex items-center gap-2 mb-2 pr-8">
+          <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+            {defect.defectNumber}
+          </span>
+          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${statusStyle.bg} ${statusStyle.text}`}>
+            <span className={`w-1 h-1 rounded-full ${statusStyle.dot}`} />
             {defect.status.replace('_', ' ')}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="font-medium text-gray-900 mb-1 line-clamp-2" title={defect.title}>
+        <h3 className="font-semibold text-sm text-slate-900 mb-1.5 leading-snug line-clamp-2">
           {defect.title}
         </h3>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-          {defect.description || 'No description provided'}
+        <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+          {defect.description}
         </p>
 
-        {/* Meta info */}
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <div className="flex items-center gap-1 truncate" title={defect.location}>
-            <MapPin className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+        {/* Footer: Location and image count */}
+        <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-1 truncate">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
             <span className="truncate">{defect.location}</span>
           </div>
-          {defect.images?.length > 0 && (
-            <div className="flex items-center gap-1" aria-label={`${defect.images.length} images`}>
-              <ImageIcon className="w-3 h-3" aria-hidden="true" />
-              <span>{defect.images.length}</span>
+          {(defect.images?.length || 0) > 0 && (
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <ImageIcon className="w-3 h-3" />
+              <span>{defect.images?.length}</span>
             </div>
           )}
         </div>
       </div>
-
-      {/* Modals */}
-      <DefectDetailModal
-        defect={defect}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        onStatusChange={(updatedDefect) => {
-          // Trigger refresh
-          window.dispatchEvent(new CustomEvent('defect-updated', { detail: { defectId: updatedDefect.id } }));
-        }}
-        onEdit={() => {
-          setIsDetailModalOpen(false);
-          // Open edit modal (could be implemented)
-        }}
-        onDelete={() => {
-          setIsDetailModalOpen(false);
-          setIsDeleteModalOpen(true);
-        }}
-      />
-
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        defect={defect}
-        onDefectDeleted={handleDefectDeleted}
-      />
-    </>
+    </div>
   );
+}
+
+// Draggable wrapper component - only used for actual cards in columns
+function DraggableDefectCard({ defect, onClick, isDragging }: { defect: Defect; onClick?: (defect: Defect) => void; isDragging?: boolean }) {
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: defect.id,
+  });
+
+  const handleClick = () => {
+    if (onClick && !isDragging) {
+      onClick(defect);
+    }
+  };
+
+  const statusStyle = statusColors[defect.status];
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      className={`bg-white rounded-xl border transition-all relative overflow-hidden touch-manipulation ${
+        isDragging
+          ? 'opacity-40 grayscale border-slate-200'
+          : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'
+      } cursor-auto`}
+    >
+      {/* Drag handle - has the listeners for drag initiation */}
+      <div
+        {...listeners}
+        className="hidden sm:flex absolute top-3 right-3 p-1.5 rounded-md text-slate-400 hover:text-slate-600 z-10 items-center justify-center cursor-grab hover:bg-slate-100 active:cursor-grabbing transition-colors"
+        title="Drag to move"
+      >
+        <GripVertical className="w-4 h-4" />
+      </div>
+
+      {/* Card content */}
+      <div onClick={handleClick} className="p-4 cursor-pointer">
+        {/* Header: Defect number and status */}
+        <div className="flex items-center gap-2 mb-2 pr-8">
+          <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+            {defect.defectNumber}
+          </span>
+          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${statusStyle.bg} ${statusStyle.text}`}>
+            <span className={`w-1 h-1 rounded-full ${statusStyle.dot}`} />
+            {defect.status.replace('_', ' ')}
+          </span>
+        </div>
+
+        {/* Title */}
+        <h3 className="font-semibold text-sm text-slate-900 mb-1.5 leading-snug line-clamp-2">
+          {defect.title}
+        </h3>
+
+        {/* Description */}
+        <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+          {defect.description}
+        </p>
+
+        {/* Footer: Location and image count */}
+        <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-1 truncate">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{defect.location}</span>
+          </div>
+          {(defect.images?.length || 0) > 0 && (
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <ImageIcon className="w-3 h-3" />
+              <span>{defect.images?.length}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main export - delegates to appropriate implementation
+export function DefectCard({ defect, onClick, isOverlay, isDragging }: DefectCardProps) {
+  // CRITICAL: When isOverlay is true, render pure visual component
+  // When false, render draggable wrapper with useDraggable hook
+  // This ensures DragOverlay can position the overlay correctly without interference
+  if (isOverlay) {
+    return <DefectCardVisual defect={defect} onClick={onClick} isOverlay={true} />;
+  }
+
+  return <DraggableDefectCard defect={defect} onClick={onClick} isDragging={isDragging} />;
 }

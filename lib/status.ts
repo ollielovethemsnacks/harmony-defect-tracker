@@ -34,19 +34,19 @@ export const statusMetadata: Record<DefectStatus, StatusMetadata> = {
   TODO: {
     label: 'To Do',
     description: 'Defect identified, awaiting action',
-    badgeClasses: 'bg-amber-100 text-amber-800 border-amber-200',
+    badgeClasses: 'bg-amber-50 text-amber-700 border-amber-200',
     icon: 'Circle',
   },
   IN_PROGRESS: {
     label: 'In Progress',
     description: 'Work is actively underway',
-    badgeClasses: 'bg-blue-100 text-blue-800 border-blue-200',
+    badgeClasses: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     icon: 'Loader2',
   },
   DONE: {
     label: 'Done',
     description: 'Defect has been resolved',
-    badgeClasses: 'bg-green-100 text-green-800 border-green-200',
+    badgeClasses: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     icon: 'CheckCircle2',
   },
 };
@@ -57,25 +57,25 @@ export const severityMetadata: Record<DefectSeverity, SeverityMetadata> = {
   CRITICAL: {
     label: 'Critical',
     description: 'Structural or safety issue — immediate action required',
-    badgeClasses: 'bg-red-100 text-red-800 border-red-200',
+    badgeClasses: 'bg-rose-50 text-rose-700 border-rose-200',
     icon: 'OctagonAlert',
   },
   HIGH: {
     label: 'High',
     description: 'Major functional defect — needs prompt attention',
-    badgeClasses: 'bg-orange-100 text-orange-800 border-orange-200',
+    badgeClasses: 'bg-orange-50 text-orange-700 border-orange-200',
     icon: 'AlertTriangle',
   },
   MEDIUM: {
     label: 'Medium',
     description: 'Minor or cosmetic defect — standard priority',
-    badgeClasses: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    badgeClasses: 'bg-amber-50 text-amber-700 border-amber-200',
     icon: 'AlertCircle',
   },
   LOW: {
     label: 'Low',
     description: 'Observation — low impact, address when convenient',
-    badgeClasses: 'bg-blue-100 text-blue-800 border-blue-200',
+    badgeClasses: 'bg-slate-100 text-slate-700 border-slate-200',
     icon: 'Info',
   },
 };

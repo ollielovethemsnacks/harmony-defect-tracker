@@ -240,14 +240,16 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
   };
 
   const nextImage = () => {
-    if (defect?.images) {
-      setCurrentImageIndex((prev) => (prev + 1) % defect.images.length);
+    const images = defect?.images;
+    if (images && images.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }
   };
 
   const prevImage = () => {
-    if (defect?.images) {
-      setCurrentImageIndex((prev) => (prev - 1 + defect.images.length) % defect.images.length);
+    const images = defect?.images;
+    if (images && images.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
     }
   };
 
@@ -266,7 +268,7 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
       </div>
 
       <div
-        className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/50 overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 modal-backdrop overflow-y-auto"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
@@ -274,19 +276,19 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
       >
         <div
           ref={modalRef}
-          className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl sm:my-8 mx-auto"
+          className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl sm:my-8 mx-auto border border-slate-200/60"
           role="dialog"
           aria-modal="true"
           aria-labelledby="defect-modal-title"
           aria-describedby="defect-modal-desc"
         >
           {/* Header — sticky so close is always reachable on mobile */}
-          <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+          <div className="sticky top-0 bg-white border-b border-slate-100 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
             <div className="flex-1 min-w-0 pr-2">
-              <span className="text-sm font-mono text-gray-500">{defect.defectNumber}</span>
+              <span className="text-xs font-mono font-medium text-slate-400 uppercase tracking-wider">{defect.defectNumber}</span>
               <h2
                 id="defect-modal-title"
-                className="text-lg sm:text-xl font-bold text-gray-900 mt-0.5 sm:mt-1 truncate"
+                className="text-lg sm:text-xl font-semibold text-slate-900 mt-0.5 truncate"
               >
                 {defect.title}
               </h2>
@@ -299,11 +301,11 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
                 isLoading={isStatusUpdating}
                 disabled={isStatusUpdating}
               />
-              {/* Edit button — min 44px tap target */}
+              {/* Edit button */}
               {onEdit && (
                 <button
                   onClick={onEdit}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 hover:bg-blue-50 text-blue-600 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  className="p-2 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   aria-label="Edit defect"
                   title="Edit"
                 >
@@ -312,11 +314,11 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
                   </svg>
                 </button>
               )}
-              {/* Delete button — min 44px tap target */}
+              {/* Delete button */}
               {onDelete && (
                 <button
                   onClick={onDelete}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 hover:bg-red-50 text-red-600 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                  className="p-2 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
                   aria-label="Delete defect"
                   title="Delete"
                 >
@@ -325,60 +327,67 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
                   </svg>
                 </button>
               )}
-              {/* Close button — min 44px tap target, auto-focused */}
+              {/* Close button */}
               <button
                 ref={closeBtnRef}
                 onClick={onClose}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 hover:bg-gray-100 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                className="p-2 hover:bg-slate-100 text-slate-500 hover:text-slate-700 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
                 aria-label="Close defect details"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
           </div>
 
-          {/* Content — id used for aria-describedby */}
-          <div id="defect-modal-desc" className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          {/* Content */}
+          <div id="defect-modal-desc" className="p-4 sm:p-6 space-y-5 overflow-y-auto max-h-[calc(90vh-80px)]">
             {/* Status & Location */}
-            <div className="flex flex-wrap gap-2 sm:gap-3" role="list" aria-label="Defect metadata">
+            <div className="flex flex-wrap gap-2" role="list" aria-label="Defect metadata">
               <span
-                className={`px-3 py-1.5 rounded-full text-sm font-medium status-badge ${statusMetadata[defect.status].badgeClasses}`}
+                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${statusMetadata[defect.status].badgeClasses}`}
                 role="listitem"
               >
                 {statusMetadata[defect.status].label}
               </span>
-              <span className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm" role="listitem">
-                📍 {defect.location}
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium" role="listitem">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {defect.location}
               </span>
               {defect.standardReference && (
-                <span className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm" role="listitem">
-                  📋 {defect.standardReference}
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium" role="listitem">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {defect.standardReference}
                 </span>
               )}
             </div>
 
             {/* Description */}
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{defect.description}</p>
+              <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Description</h3>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{defect.description}</p>
             </div>
 
             {/* Images */}
             {defect.images && defect.images.length > 0 && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">
+                <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-3">
                   Images ({defect.images.length})
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {defect.images.map((img, idx) => (
                     <div
                       key={idx}
-                      className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden cursor-pointer group"
+                      className="relative aspect-video bg-slate-100 rounded-xl overflow-hidden cursor-pointer group"
                     >
                       <button
-                        className="w-full h-full p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        className="w-full h-full p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                         onClick={() => openLightbox(idx)}
                         aria-label={`View defect image ${idx + 1} of ${defect.images!.length}`}
                       >
@@ -388,8 +397,8 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
-                          <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors">
+                          <svg className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                           </svg>
                         </div>
@@ -404,9 +413,9 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
             <DefectNotes defect={defect} />
 
             {/* Dates */}
-            <div className="text-sm text-gray-500 border-t pt-4">
-              <p>Created: {new Date(defect.createdAt).toLocaleDateString()}</p>
-              <p>Updated: {new Date(defect.updatedAt).toLocaleDateString()}</p>
+            <div className="text-xs text-slate-400 border-t border-slate-100 pt-4 flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span>Created {new Date(defect.createdAt).toLocaleDateString()}</span>
+              <span>Updated {new Date(defect.updatedAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
