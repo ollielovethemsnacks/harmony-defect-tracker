@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import * as schema from './schema';
+import type { NeonHTTPDatabase } from 'drizzle-orm/neon-http';
 
 // Initialize db - will throw at runtime if DATABASE_URL is not set
 // This is safe because CI/CD always sets DATABASE_URL
@@ -11,9 +12,7 @@ if (!databaseUrl) {
 
 const sql = databaseUrl ? neon(databaseUrl) : null;
 // Use type assertion to ensure db is always typed as drizzle instance
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-type DrizzleInstance = ReturnType<typeof drizzle<typeof schema, 'public'>>;
-export const db = (sql ? drizzle(sql, { schema }) : null) as DrizzleInstance;
+export const db = (sql ? drizzle(sql, { schema }) : null) as NeonHTTPDatabase<typeof schema>;
 
 // Export getDb for compatibility with existing code
 export function getDb() {
