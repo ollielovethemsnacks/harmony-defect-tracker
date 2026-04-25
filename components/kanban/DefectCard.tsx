@@ -37,6 +37,7 @@ export function DefectCard({ defect, onClick }: DefectCardProps) {
       {...attributes}
       onClick={handleClick}
       className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+    >
       <div className="flex items-start justify-between mb-2">
         <span className="text-xs font-mono text-gray-500">{defect.defectNumber}</span>
         <span className={`text-xs px-2 py-1 rounded-full ${statusColors[defect.status]}`}>
