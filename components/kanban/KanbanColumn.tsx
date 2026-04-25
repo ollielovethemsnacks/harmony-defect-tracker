@@ -32,9 +32,9 @@ export function KanbanColumn({ status, defects, currentSort, onDefectClick, onSo
   return (
     <div
       ref={setNodeRef}
-      className={`w-full sm:min-w-0 lg:min-w-[280px] rounded-lg border-2 ${columnColors[status]} ${
+      className={`w-full lg:min-w-[280px] lg:max-w-[400px] lg:flex-1 rounded-lg border-2 ${columnColors[status]} ${
         isOver ? 'ring-2 ring-blue-400 ring-offset-2' : ''
-      } p-2 sm:p-3 lg:p-4 flex flex-col h-auto sm:h-full mb-4 sm:mb-0 transition-all`}
+      } p-3 lg:p-4 flex flex-col h-auto lg:h-auto mb-4 lg:mb-0 transition-all`}
     >
       {/* Responsive column header with sort controls */}
       <div className="flex items-center justify-between mb-2 sm:mb-3 flex-shrink-0">
@@ -51,7 +51,7 @@ export function KanbanColumn({ status, defects, currentSort, onDefectClick, onSo
         />
       </div>
       {/* Card container with responsive spacing */}
-      <div className="space-y-2 sm:space-y-3 overflow-y-auto flex-1 min-h-[150px] sm:min-h-0">
+      <div className="space-y-3 overflow-y-auto flex-1 min-h-[100px]">
         {defects.map((defect) => (
           <div
             key={defect.id}

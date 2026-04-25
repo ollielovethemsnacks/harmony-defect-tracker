@@ -243,7 +243,7 @@ export function KanbanBoard() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 p-4 h-screen">
+        <div className="flex flex-col lg:flex-row gap-4 p-4 min-h-screen">
           {COLUMNS.map((status) => (
             <KanbanColumn
               key={status}
