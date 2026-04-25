@@ -31,7 +31,7 @@ export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
   const cursorClass = isOverlay ? 'cursor-grabbing' : 'cursor-auto';
 
   const handleClick = () => {
-    if (onClick) {
+    if (onClick && !isDragging) {
       onClick(defect);
     }
   };
@@ -40,39 +40,38 @@ export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
     <div
       ref={setNodeRef}
       {...attributes}
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all relative w-full overflow-hidden touch-manipulation ${dragStateClasses} ${cursorClass}`}
-      style={isOverlay ? { width: '320px' } : undefined}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all relative overflow-hidden touch-manipulation ${dragStateClasses} ${cursorClass}`}
+      style={{ width: isOverlay ? undefined : '100%' }}
     >
       {/* Drag handle - only this area initiates drag */}
       {/* Hidden on mobile since drag-and-drop isn't supported on touch devices */}
-      <div
-        {...listeners}
-        className={`hidden sm:flex absolute top-2 right-2 p-2 sm:p-1.5 rounded text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] items-center justify-center sm:min-w-0 sm:min-h-0 ${
-          isOverlay 
-            ? 'cursor-grabbing bg-blue-50' 
-            : 'cursor-grab hover:bg-gray-100 active:cursor-grabbing'
-        }`}
-        title="Drag to move"
-      >
-        {/* Responsive icon sizing: larger on mobile for touch */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-5 h-5 sm:w-4 sm:h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      {/* Don't render drag handle on overlay - it shouldn't have interactive elements */}
+      {!isOverlay && (
+        <div
+          {...listeners}
+          className={`hidden sm:flex absolute top-2 right-2 p-2 sm:p-1.5 rounded text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] items-center justify-center sm:min-w-0 sm:min-h-0 cursor-grab hover:bg-gray-100 active:cursor-grabbing`}
+          title="Drag to move"
         >
-          <circle cx="9" cy="12" r="1" />
-          <circle cx="9" cy="5" r="1" />
-          <circle cx="9" cy="19" r="1" />
-          <circle cx="15" cy="12" r="1" />
-          <circle cx="15" cy="5" r="1" />
-          <circle cx="15" cy="19" r="1" />
-        </svg>
-      </div>
+          {/* Responsive icon sizing: larger on mobile for touch */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-5 h-5 sm:w-4 sm:h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="9" cy="12" r="1" />
+            <circle cx="9" cy="5" r="1" />
+            <circle cx="9" cy="19" r="1" />
+            <circle cx="15" cy="12" r="1" />
+            <circle cx="15" cy="5" r="1" />
+            <circle cx="15" cy="19" r="1" />
+          </svg>
+        </div>
+      )}
 
       {/* Card content - clicking here opens the modal */}
       {/* Responsive padding and font sizes */}

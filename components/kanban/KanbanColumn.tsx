@@ -53,12 +53,11 @@ export function KanbanColumn({ status, defects, currentSort, onDefectClick, onSo
       {/* Card container with responsive spacing */}
       <div className="space-y-3 overflow-y-auto flex-1 min-h-[100px]">
         {defects.map((defect) => (
-          <div
-            key={defect.id}
-            className={activeDefectId === defect.id ? 'opacity-30 grayscale' : ''}
-          >
-            <DefectCard defect={defect} onClick={onDefectClick} />
-          </div>
+          <DefectCard 
+            key={defect.id} 
+            defect={defect} 
+            onClick={onDefectClick}
+          />
         ))}
         {defects.length === 0 && (
           <div className="text-center py-8 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
