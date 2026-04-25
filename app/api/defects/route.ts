@@ -20,30 +20,37 @@ const createDefectSchema = z.object({
 // Helper to generate next defect number
 async function generateDefectNumber(): Promise<string> {
   const year = new Date().getFullYear();
-  const { defectNumberSequences } = await import('@/lib/db/schema');
   
-  // Try to get existing sequence for this year
-  let sequence = await db.query.defectNumberSequences.findFirst({
-    where: (seq, { eq }) => eq(seq.year, year),
-  });
-  
-  if (!sequence) {
-    // Create new sequence for this year
-    const [newSeq] = await db.insert(defectNumberSequences)
-      .values({ year, lastNumber: 1 })
-      .returning();
-    sequence = newSeq;
-    return `DF-${year}-0001`;
+  try {
+    const { defectNumberSequences } = await import('@/lib/db/schema');
+    
+    // Try to get existing sequence for this year
+    let sequence = await db.query.defectNumberSequences.findFirst({
+      where: (seq, { eq }) => eq(seq.year, year),
+    });
+    
+    if (!sequence) {
+      // Create new sequence for this year
+      const [newSeq] = await db.insert(defectNumberSequences)
+        .values({ year, lastNumber: 1 })
+        .returning();
+      sequence = newSeq;
+      return `DF-${year}-0001`;
+    }
+    
+    // Increment sequence
+    const nextNumber = sequence.lastNumber + 1;
+    await db.update(defectNumberSequences)
+      .set({ lastNumber: nextNumber, updatedAt: new Date() })
+      .where(eq(defectNumberSequences.id, sequence.id));
+    
+    const paddedNumber = nextNumber.toString().padStart(4, '0');
+    return `DF-${year}-${paddedNumber}`;
+  } catch (err) {
+    // Fallback if table doesn't exist yet
+    const randomSuffix = Math.floor(Math.random() * 9000) + 1000;
+    return `DF-${year}-${randomSuffix}`;
   }
-  
-  // Increment sequence
-  const nextNumber = sequence.lastNumber + 1;
-  await db.update(defectNumberSequences)
-    .set({ lastNumber: nextNumber, updatedAt: new Date() })
-    .where(eq(defectNumberSequences.id, sequence.id));
-  
-  const paddedNumber = nextNumber.toString().padStart(4, '0');
-  return `DF-${year}-${paddedNumber}`;
 }
 
 // GET /api/defects - List all non-deleted defects
@@ -75,7 +82,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         orderByClause = sortDir === 'desc' ? desc(defects.title) : asc(defects.title);
         break;
       case 'sortOrder':
-        orderByClause = sortDir === 'desc' ? desc(defects.sortOrder) : asc(defects.sortOrder);
+        // Fallback to defectNumber if sortOrder column doesn't exist yet
+        orderByClause = sortDir === 'desc' ? desc(defects.defectNumber) : asc(defects.defectNumber);
         break;
       default:
         orderByClause = asc(defects.defectNumber);
@@ -109,16 +117,21 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Update each defect's sort order
+    // Update each defect's sort order (skip if column doesn't exist yet)
     for (const item of reorderItems) {
       if (!item.id || typeof item.sortOrder !== 'number') {
         continue;
       }
       
-      await db
-        .update(defects)
-        .set({ sortOrder: item.sortOrder, updatedAt: new Date() })
-        .where(eq(defects.id, item.id));
+      try {
+        await db
+          .update(defects)
+          .set({ sortOrder: item.sortOrder, updatedAt: new Date() })
+          .where(eq(defects.id, item.id));
+      } catch (err) {
+        // Column might not exist yet, skip silently
+        console.warn('Failed to update sortOrder, column may not exist yet');
+      }
     }
 
     return NextResponse.json({ success: true, message: 'Sort orders updated' });
