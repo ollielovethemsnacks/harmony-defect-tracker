@@ -1,0 +1,11 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/defects/[id]/comments/route": "/api/defects/[id]/comments",
+  "/api/defects/[id]/restore/route": "/api/defects/[id]/restore",
+  "/api/defects/[id]/route": "/api/defects/[id]",
+  "/api/defects/route": "/api/defects",
+  "/api/upload/route": "/api/upload",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}
