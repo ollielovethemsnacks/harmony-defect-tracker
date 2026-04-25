@@ -324,15 +324,9 @@ export function KanbanBoard() {
             duration: 200,
             easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
           }}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            transform: 'translate3d(var(--translate-x, 0), var(--translate-y, 0), 0)',
-          }}
         >
           {activeDragDefect ? (
-            <div className="w-[320px] lg:w-[360px] transform rotate-2 scale-105 cursor-grabbing">
+            <div className="w-[320px] lg:w-[360px] rotate-2 scale-105 cursor-grabbing">
               <DefectCard 
                 defect={activeDragDefect} 
                 isOverlay 

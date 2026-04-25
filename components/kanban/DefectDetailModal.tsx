@@ -283,7 +283,7 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
           aria-describedby="defect-modal-desc"
         >
           {/* Header — sticky so close is always reachable on mobile */}
-          <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+          <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10 shadow-sm">
             <div className="flex-1 min-w-0 pr-2">
               <span className="text-sm font-mono text-gray-500">{defect.defectNumber}</span>
               <h2
@@ -341,8 +341,8 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
             </div>
           </div>
 
-          {/* Content — id used for aria-describedby */}
-          <div id="defect-modal-desc" className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          {/* Content — id used for aria-describedby, with scrollable container */}
+          <div id="defect-modal-desc" className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto max-h-[calc(90vh-80px)]">
             {/* Status & Location */}
             <div className="flex flex-wrap gap-2 sm:gap-3" role="list" aria-label="Defect metadata">
               <span
