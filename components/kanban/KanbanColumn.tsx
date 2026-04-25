@@ -12,9 +12,9 @@ const columnTitles: Record<DefectStatus, string> = {
 };
 
 const columnColors: Record<DefectStatus, { bg: string; border: string; indicator: string; text: string }> = {
-  TODO: { bg: 'bg-amber-50/30', border: 'border-amber-200/30', indicator: 'bg-amber-500', text: 'text-amber-700' },
-  IN_PROGRESS: { bg: 'bg-indigo-50/30', border: 'border-indigo-200/30', indicator: 'bg-indigo-500', text: 'text-indigo-700' },
-  DONE: { bg: 'bg-emerald-50/30', border: 'border-emerald-200/30', indicator: 'bg-emerald-500', text: 'text-emerald-700' },
+  TODO: { bg: 'bg-amber-50', border: 'border-amber-200', indicator: 'bg-amber-500', text: 'text-amber-800' },
+  IN_PROGRESS: { bg: 'bg-blue-50', border: 'border-blue-200', indicator: 'bg-blue-500', text: 'text-blue-800' },
+  DONE: { bg: 'bg-emerald-50', border: 'border-emerald-200', indicator: 'bg-emerald-500', text: 'text-emerald-800' },
 };
 
 interface KanbanColumnProps {
@@ -41,10 +41,10 @@ export function KanbanColumn({ status, defects, currentSort, onDefectClick, onSo
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <span className={`w-2 h-2 rounded-full ${colors.indicator}`} />
-          <h2 className="font-semibold text-sm text-slate-800">
+          <h2 className="font-semibold text-sm text-slate-900">
             {columnTitles[status]}
           </h2>
-          <span className="px-2 py-0.5 bg-white/80 rounded-full text-xs font-medium text-slate-500 border border-slate-200/50">
+          <span className="px-2 py-0.5 bg-white rounded-full text-xs font-medium text-slate-700 border border-slate-300">
             {defects.length}
           </span>
         </div>
@@ -66,11 +66,11 @@ export function KanbanColumn({ status, defects, currentSort, onDefectClick, onSo
           />
         ))}
         {defects.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-white/50">
-            <svg className="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex flex-col items-center justify-center py-12 text-slate-500 border-2 border-dashed border-slate-300 rounded-xl bg-white">
+            <svg className="w-8 h-8 mb-2 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <span className="text-xs font-medium">No defects</span>
+            <span className="text-sm font-medium">No defects</span>
           </div>
         )}
       </div>

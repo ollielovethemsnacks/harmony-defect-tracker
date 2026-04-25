@@ -12,9 +12,9 @@ interface DefectCardProps {
 }
 
 const statusColors: Record<DefectStatus, { bg: string; text: string; dot: string }> = {
-  TODO: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
-  IN_PROGRESS: { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500' },
-  DONE: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  TODO: { bg: 'bg-amber-100', text: 'text-amber-900', dot: 'bg-amber-600' },
+  IN_PROGRESS: { bg: 'bg-blue-100', text: 'text-blue-900', dot: 'bg-blue-600' },
+  DONE: { bg: 'bg-emerald-100', text: 'text-emerald-900', dot: 'bg-emerald-600' },
 };
 
 // Pure visual component - no drag logic at all
@@ -30,10 +30,10 @@ function DefectCardVisual({ defect, onClick, isOverlay }: DefectCardProps) {
 
   return (
     <div
-      className={`bg-white rounded-xl border border-slate-200 transition-all relative overflow-hidden touch-manipulation ${
+      className={`bg-white rounded-xl border border-slate-300 transition-all relative overflow-hidden touch-manipulation ${
         isOverlay
           ? 'shadow-2xl ring-2 ring-slate-400/50 cursor-grabbing rotate-1 scale-[1.02]'
-          : 'shadow-sm hover:shadow-md hover:border-slate-300'
+          : 'shadow-sm hover:shadow-md hover:border-slate-400'
       } ${isOverlay ? 'cursor-grabbing' : 'cursor-auto'}`}
       style={isOverlay ? { width: '320px' } : undefined}
     >
@@ -51,7 +51,7 @@ function DefectCardVisual({ defect, onClick, isOverlay }: DefectCardProps) {
       <div onClick={handleClick} className="p-4 cursor-pointer">
         {/* Header: Defect number and status */}
         <div className="flex items-center gap-2 mb-2 pr-8">
-          <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+          <span className="text-[10px] font-mono font-medium text-slate-600 uppercase tracking-wider">
             {defect.defectNumber}
           </span>
           <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${statusStyle.bg} ${statusStyle.text}`}>
@@ -66,12 +66,12 @@ function DefectCardVisual({ defect, onClick, isOverlay }: DefectCardProps) {
         </h3>
 
         {/* Description */}
-        <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+        <p className="text-xs text-slate-700 mb-3 line-clamp-2 leading-relaxed">
           {defect.description}
         </p>
 
         {/* Footer: Location and image count */}
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
+        <div className="flex items-center justify-between text-[11px] text-slate-600">
           <div className="flex items-center gap-1 truncate">
             <MapPin className="w-3 h-3 flex-shrink-0" />
             <span className="truncate">{defect.location}</span>
@@ -108,8 +108,8 @@ function DraggableDefectCard({ defect, onClick, isDragging }: { defect: Defect; 
       {...attributes}
       className={`bg-white rounded-xl border transition-all relative overflow-hidden touch-manipulation ${
         isDragging
-          ? 'opacity-40 grayscale border-slate-200'
-          : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'
+          ? 'opacity-40 grayscale border-slate-300'
+          : 'border-slate-300 shadow-sm hover:shadow-md hover:border-slate-400'
       } cursor-auto`}
     >
       {/* Drag handle - has the listeners for drag initiation */}
@@ -125,7 +125,7 @@ function DraggableDefectCard({ defect, onClick, isDragging }: { defect: Defect; 
       <div onClick={handleClick} className="p-4 cursor-pointer">
         {/* Header: Defect number and status */}
         <div className="flex items-center gap-2 mb-2 pr-8">
-          <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+          <span className="text-[10px] font-mono font-medium text-slate-600 uppercase tracking-wider">
             {defect.defectNumber}
           </span>
           <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${statusStyle.bg} ${statusStyle.text}`}>
@@ -140,12 +140,12 @@ function DraggableDefectCard({ defect, onClick, isDragging }: { defect: Defect; 
         </h3>
 
         {/* Description */}
-        <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+        <p className="text-xs text-slate-700 mb-3 line-clamp-2 leading-relaxed">
           {defect.description}
         </p>
 
         {/* Footer: Location and image count */}
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
+        <div className="flex items-center justify-between text-[11px] text-slate-600">
           <div className="flex items-center gap-1 truncate">
             <MapPin className="w-3 h-3 flex-shrink-0" />
             <span className="truncate">{defect.location}</span>
