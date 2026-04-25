@@ -25,10 +25,10 @@ const columnTitles: Record<DefectStatus, string> = {
   DONE: 'Done',
 };
 
-const columnColors: Record<DefectStatus, { bg: string; text: string; border: string }> = {
-  TODO: { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300' },
-  IN_PROGRESS: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300' },
-  DONE: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-300' },
+const columnColors: Record<DefectStatus, { bg: string; text: string; border: string; indicator: string }> = {
+  TODO: { bg: 'bg-amber-50/50', text: 'text-amber-700', border: 'border-amber-200/50', indicator: 'bg-amber-500' },
+  IN_PROGRESS: { bg: 'bg-indigo-50/50', text: 'text-indigo-700', border: 'border-indigo-200/50', indicator: 'bg-indigo-500' },
+  DONE: { bg: 'bg-emerald-50/50', text: 'text-emerald-700', border: 'border-emerald-200/50', indicator: 'bg-emerald-500' },
 };
 
 export function KanbanBoard() {
@@ -248,21 +248,36 @@ export function KanbanBoard() {
     setSelectedDefect(null);
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="flex items-center gap-3 text-slate-400">
+        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span className="text-sm font-medium">Loading defects...</span>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <div className="p-4">
+      {/* New Defect Button - Floating action style */}
+      <div className="px-6 py-4">
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98]"
         >
-          + New Defect
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          New Defect
         </button>
       </div>
-      {/* Mobile Tab Navigation - Only visible on small screens */}
-      <div className="lg:hidden px-4 mb-2">
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+
+      {/* Mobile Tab Navigation - Minimalist pills */}
+      <div className="lg:hidden px-4 mb-4">
+        <div className="flex gap-1 bg-slate-100/80 rounded-xl p-1.5">
           {COLUMNS.map((status) => {
             const count = defects.filter((d) => d.status === status).length;
             const colors = columnColors[status];
@@ -271,15 +286,15 @@ export function KanbanBoard() {
               <button
                 key={status}
                 onClick={() => setActiveMobileTab(status)}
-                className={`flex-1 px-2 py-2 rounded-md text-xs font-medium transition-all ${
+                className={`flex-1 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                   isActive
-                    ? `${colors.bg} ${colors.text} shadow-sm`
-                    : 'text-gray-600 hover:bg-gray-200'
+                    ? `bg-white ${colors.text} shadow-sm ring-1 ring-slate-200`
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                 }`}
               >
                 <span className="block truncate">{columnTitles[status]}</span>
-                <span className={`text-[10px] ${isActive ? colors.text : 'text-gray-500'}`}>
-                  {count} items
+                <span className={`text-[10px] ${isActive ? 'opacity-70' : 'text-slate-400'}`}>
+                  {count}
                 </span>
               </button>
             );
@@ -287,12 +302,12 @@ export function KanbanBoard() {
         </div>
       </div>
 
-      <DndContext 
+      <DndContext
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
         {/* Desktop: Show all columns side by side */}
-        <div className="hidden lg:flex lg:flex-row gap-4 p-4 min-h-screen">
+        <div className="hidden lg:flex lg:flex-row gap-6 px-6 pb-6 min-h-[calc(100vh-200px)]">
           {COLUMNS.map((status) => (
             <KanbanColumn
               key={status}
@@ -307,7 +322,7 @@ export function KanbanBoard() {
         </div>
 
         {/* Mobile: Show only active tab */}
-        <div className="lg:hidden p-4">
+        <div className="lg:hidden px-4 pb-6">
           <KanbanColumn
             status={activeMobileTab}
             defects={getSortedDefects(activeMobileTab)}
@@ -319,16 +334,16 @@ export function KanbanBoard() {
         </div>
 
         {/* DragOverlay - renders the floating dragged item */}
-        <DragOverlay 
+        <DragOverlay
           dropAnimation={{
             duration: 200,
             easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
           }}
         >
           {activeDragDefect ? (
-            <DefectCard 
-              defect={activeDragDefect} 
-              isOverlay 
+            <DefectCard
+              defect={activeDragDefect}
+              isOverlay
             />
           ) : null}
         </DragOverlay>

@@ -2,17 +2,19 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { Defect, DefectStatus } from '@/types';
+import { MapPin, Image as ImageIcon, GripVertical } from 'lucide-react';
 
 interface DefectCardProps {
   defect: Defect;
   onClick?: (defect: Defect) => void;
   isOverlay?: boolean;
+  isDragging?: boolean;
 }
 
-const statusColors: Record<DefectStatus, string> = {
-  TODO: 'bg-amber-100 text-amber-800',
-  IN_PROGRESS: 'bg-blue-100 text-blue-800',
-  DONE: 'bg-green-100 text-green-800',
+const statusColors: Record<DefectStatus, { bg: string; text: string; dot: string }> = {
+  TODO: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+  IN_PROGRESS: { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500' },
+  DONE: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
 };
 
 // Pure visual component - no drag logic at all
@@ -24,54 +26,62 @@ function DefectCardVisual({ defect, onClick, isOverlay }: DefectCardProps) {
     }
   };
 
+  const statusStyle = statusColors[defect.status];
+
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all relative overflow-hidden touch-manipulation ${
+      className={`bg-white rounded-xl border border-slate-200 transition-all relative overflow-hidden touch-manipulation ${
         isOverlay
-          ? 'shadow-2xl ring-2 ring-blue-400 ring-opacity-50 cursor-grabbing rotate-2 scale-105'
-          : 'hover:shadow-md'
+          ? 'shadow-2xl ring-2 ring-slate-400/50 cursor-grabbing rotate-1 scale-[1.02]'
+          : 'shadow-sm hover:shadow-md hover:border-slate-300'
       } ${isOverlay ? 'cursor-grabbing' : 'cursor-auto'}`}
       style={isOverlay ? { width: '320px' } : undefined}
     >
       {/* Drag handle - only on non-overlay cards, hidden on mobile */}
       {!isOverlay && (
         <div
-          className="hidden sm:flex absolute top-2 right-2 p-2 sm:p-1.5 rounded text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] items-center justify-center sm:min-w-0 sm:min-h-0 cursor-grab hover:bg-gray-100 active:cursor-grabbing"
+          className="hidden sm:flex absolute top-3 right-3 p-1.5 rounded-md text-slate-400 hover:text-slate-600 z-10 items-center justify-center cursor-grab hover:bg-slate-100 active:cursor-grabbing transition-colors"
           title="Drag to move"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-5 h-5 sm:w-4 sm:h-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="9" cy="12" r="1" />
-            <circle cx="9" cy="5" r="1" />
-            <circle cx="9" cy="19" r="1" />
-            <circle cx="15" cy="12" r="1" />
-            <circle cx="15" cy="5" r="1" />
-            <circle cx="15" cy="19" r="1" />
-          </svg>
+          <GripVertical className="w-4 h-4" />
         </div>
       )}
 
       {/* Card content */}
-      <div onClick={handleClick} className="p-3 sm:p-4 cursor-pointer">
-        <div className="flex items-start justify-between mb-2 pr-10 sm:pr-8">
-          <span className="text-[10px] sm:text-xs font-mono text-gray-500">{defect.defectNumber}</span>
-          <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${statusColors[defect.status]}`}>
+      <div onClick={handleClick} className="p-4 cursor-pointer">
+        {/* Header: Defect number and status */}
+        <div className="flex items-center gap-2 mb-2 pr-8">
+          <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+            {defect.defectNumber}
+          </span>
+          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${statusStyle.bg} ${statusStyle.text}`}>
+            <span className={`w-1 h-1 rounded-full ${statusStyle.dot}`} />
             {defect.status.replace('_', ' ')}
           </span>
         </div>
-        <h3 className="font-medium text-sm sm:text-base text-gray-900 mb-1 leading-tight">{defect.title}</h3>
-        <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{defect.description}</p>
-        <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500">
-          <span className="truncate max-w-[70%]">📍 {defect.location}</span>
-          {(defect.images?.length || 0) > 0 && <span>📷 {defect.images?.length || 0}</span>}
+
+        {/* Title */}
+        <h3 className="font-semibold text-sm text-slate-900 mb-1.5 leading-snug line-clamp-2">
+          {defect.title}
+        </h3>
+
+        {/* Description */}
+        <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+          {defect.description}
+        </p>
+
+        {/* Footer: Location and image count */}
+        <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-1 truncate">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{defect.location}</span>
+          </div>
+          {(defect.images?.length || 0) > 0 && (
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <ImageIcon className="w-3 h-3" />
+              <span>{defect.images?.length}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -79,8 +89,8 @@ function DefectCardVisual({ defect, onClick, isOverlay }: DefectCardProps) {
 }
 
 // Draggable wrapper component - only used for actual cards in columns
-function DraggableDefectCard({ defect, onClick }: { defect: Defect; onClick?: (defect: Defect) => void }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+function DraggableDefectCard({ defect, onClick, isDragging }: { defect: Defect; onClick?: (defect: Defect) => void; isDragging?: boolean }) {
+  const { attributes, listeners, setNodeRef } = useDraggable({
     id: defect.id,
   });
 
@@ -90,52 +100,62 @@ function DraggableDefectCard({ defect, onClick }: { defect: Defect; onClick?: (d
     }
   };
 
+  const statusStyle = statusColors[defect.status];
+
   return (
     <div
       ref={setNodeRef}
       {...attributes}
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all relative overflow-hidden touch-manipulation ${
-        isDragging ? 'opacity-40 grayscale shadow-inner' : 'hover:shadow-md'
+      className={`bg-white rounded-xl border transition-all relative overflow-hidden touch-manipulation ${
+        isDragging
+          ? 'opacity-40 grayscale border-slate-200'
+          : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'
       } cursor-auto`}
     >
       {/* Drag handle - has the listeners for drag initiation */}
       <div
         {...listeners}
-        className="hidden sm:flex absolute top-2 right-2 p-2 sm:p-1.5 rounded text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] items-center justify-center sm:min-w-0 sm:min-h-0 cursor-grab hover:bg-gray-100 active:cursor-grabbing"
+        className="hidden sm:flex absolute top-3 right-3 p-1.5 rounded-md text-slate-400 hover:text-slate-600 z-10 items-center justify-center cursor-grab hover:bg-slate-100 active:cursor-grabbing transition-colors"
         title="Drag to move"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-5 h-5 sm:w-4 sm:h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="9" cy="12" r="1" />
-          <circle cx="9" cy="5" r="1" />
-          <circle cx="9" cy="19" r="1" />
-          <circle cx="15" cy="12" r="1" />
-          <circle cx="15" cy="5" r="1" />
-          <circle cx="15" cy="19" r="1" />
-        </svg>
+        <GripVertical className="w-4 h-4" />
       </div>
 
       {/* Card content */}
-      <div onClick={handleClick} className="p-3 sm:p-4 cursor-pointer">
-        <div className="flex items-start justify-between mb-2 pr-10 sm:pr-8">
-          <span className="text-[10px] sm:text-xs font-mono text-gray-500">{defect.defectNumber}</span>
-          <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${statusColors[defect.status]}`}>
+      <div onClick={handleClick} className="p-4 cursor-pointer">
+        {/* Header: Defect number and status */}
+        <div className="flex items-center gap-2 mb-2 pr-8">
+          <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+            {defect.defectNumber}
+          </span>
+          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${statusStyle.bg} ${statusStyle.text}`}>
+            <span className={`w-1 h-1 rounded-full ${statusStyle.dot}`} />
             {defect.status.replace('_', ' ')}
           </span>
         </div>
-        <h3 className="font-medium text-sm sm:text-base text-gray-900 mb-1 leading-tight">{defect.title}</h3>
-        <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{defect.description}</p>
-        <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500">
-          <span className="truncate max-w-[70%]">📍 {defect.location}</span>
-          {(defect.images?.length || 0) > 0 && <span>📷 {defect.images?.length || 0}</span>}
+
+        {/* Title */}
+        <h3 className="font-semibold text-sm text-slate-900 mb-1.5 leading-snug line-clamp-2">
+          {defect.title}
+        </h3>
+
+        {/* Description */}
+        <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+          {defect.description}
+        </p>
+
+        {/* Footer: Location and image count */}
+        <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-1 truncate">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{defect.location}</span>
+          </div>
+          {(defect.images?.length || 0) > 0 && (
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <ImageIcon className="w-3 h-3" />
+              <span>{defect.images?.length}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -143,7 +163,7 @@ function DraggableDefectCard({ defect, onClick }: { defect: Defect; onClick?: (d
 }
 
 // Main export - delegates to appropriate implementation
-export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
+export function DefectCard({ defect, onClick, isOverlay, isDragging }: DefectCardProps) {
   // CRITICAL: When isOverlay is true, render pure visual component
   // When false, render draggable wrapper with useDraggable hook
   // This ensures DragOverlay can position the overlay correctly without interference
@@ -151,5 +171,5 @@ export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
     return <DefectCardVisual defect={defect} onClick={onClick} isOverlay={true} />;
   }
 
-  return <DraggableDefectCard defect={defect} onClick={onClick} />;
+  return <DraggableDefectCard defect={defect} onClick={onClick} isDragging={isDragging} />;
 }

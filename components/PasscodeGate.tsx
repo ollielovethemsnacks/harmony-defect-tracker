@@ -52,26 +52,27 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-8 w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-900 rounded-xl mb-4">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-semibold text-slate-900 mb-1">
               6 Harmony Street
             </h1>
-            <p className="text-gray-600">Defect Tracker</p>
-          </div>
-
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-sm text-amber-800">
-              🔒 This application is private. Please enter the passcode to continue.
+            <p className="text-sm text-slate-500">
+              Defect Tracker
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label 
-                htmlFor="passcode" 
-                className="block text-sm font-medium text-gray-700 mb-2"
+              <label
+                htmlFor="passcode"
+                className="block text-xs font-medium text-slate-600 uppercase tracking-wider mb-2"
               >
                 Passcode
               </label>
@@ -80,7 +81,7 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
                 id="passcode"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl tracking-widest focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-2xl tracking-[0.2em] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
                 placeholder="•••••"
                 maxLength={5}
                 autoFocus
@@ -88,22 +89,24 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-lg">
+                <p className="text-xs text-rose-600 text-center">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={passcode.length !== 5}
-              className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3 px-4 bg-slate-900 text-white text-sm font-medium rounded-xl hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
             >
               Unlock
             </button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-gray-400">
-            <p>Secured Application</p>
+          <div className="mt-6 text-center">
+            <p className="text-[10px] text-slate-400">
+              Private application — authorized access only
+            </p>
           </div>
         </div>
       </div>
@@ -116,9 +119,13 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
       <div className="fixed top-4 right-4 z-50">
         <button
           onClick={handleLogout}
-          className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors opacity-80 hover:opacity-100"
+          className="p-2.5 bg-white border border-slate-200/60 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
+          aria-label="Lock application"
+          title="Lock"
         >
-          🔒 Lock
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
         </button>
       </div>
       {children}

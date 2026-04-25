@@ -75,12 +75,12 @@ function CharCounter({ current, max, className = '' }: CharCounterProps) {
 
   return (
     <p
-      className={`text-xs transition-all duration-200 ${
+      className={`text-[10px] transition-colors ${
         atLimit
-          ? 'text-red-500 font-medium'
+          ? 'text-rose-500 font-medium'
           : nearLimit
             ? 'text-amber-500'
-            : 'text-gray-400'
+            : 'text-slate-400'
       } ${className}`}
       aria-label={`${current} of ${max} characters`}
     >
@@ -355,7 +355,7 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-defect-title"
@@ -363,17 +363,17 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
         if (e.target === e.currentTarget && !loading) handleClose();
       }}
     >
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col border border-slate-200/60">
         <ModalErrorBoundary
           onError={handleModalError}
           onRecover={handleRecover}
           recoverLabel="Reset Form"
         >
           {/* ── Header ──────────────────────────────────────────────── */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
             <h2
               id="edit-defect-title"
-              className="text-lg font-semibold text-gray-900 dark:text-gray-100"
+              className="text-lg font-semibold text-slate-900"
             >
               Edit Defect
             </h2>
@@ -381,7 +381,7 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
               aria-label="Close modal"
             >
               <svg
@@ -407,27 +407,29 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
             className="overflow-y-auto flex-1"
             noValidate
           >
-            <div className="px-6 py-5 space-y-5">
+            <div className="px-6 py-6 space-y-6">
               {/* Defect Number — read-only badge */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-2.5 rounded-lg border border-blue-200 dark:border-blue-800">
-                <label className="block text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide">
+              <div className="bg-indigo-50 px-4 py-3 rounded-xl border border-indigo-100">
+                <label className="block text-[10px] font-semibold text-indigo-600 uppercase tracking-wider mb-1">
                   Defect Number
                 </label>
-                <span className="text-sm font-mono font-semibold text-blue-800 dark:text-blue-200">
-                  {defect.defectNumber}
-                </span>
-                <span className="text-blue-400 dark:text-blue-500 ml-2 text-xs">
-                  (read-only)
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-mono font-medium text-indigo-900">
+                    {defect.defectNumber}
+                  </span>
+                  <span className="text-indigo-400 text-xs">
+                    (read-only)
+                  </span>
+                </div>
               </div>
 
               {/* ── Title ───────────────────────────────────────────── */}
               <div>
                 <label
                   htmlFor="edit-defect-title"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
                 >
-                  Title <span className="text-red-500">*</span>
+                  Title <span className="text-rose-500">*</span>
                 </label>
                 <input
                   ref={titleRef}
@@ -440,22 +442,18 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                   maxLength={MAX_TITLE}
                   disabled={loading}
                   tabIndex={1}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
-                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                    transition-colors duration-150
+                  className={`w-full px-4 py-2.5 bg-white border rounded-xl text-slate-900 placeholder-slate-400
+                    transition-all duration-150
                     ${
                       fieldErrors.title && touched.title
-                        ? 'border-red-500'
-                        : 'border-gray-300 dark:border-gray-600'
+                        ? 'border-rose-300 ring-2 ring-rose-100'
+                        : 'border-slate-200 hover:border-slate-300 focus:border-slate-400 focus:ring-2 focus:ring-slate-100'
                     }
-                    disabled:opacity-60 disabled:cursor-not-allowed`}
+                    disabled:opacity-50 disabled:cursor-not-allowed`}
                 />
-                <div className="flex justify-between mt-1">
+                <div className="flex justify-between mt-1.5">
                   {fieldErrors.title && touched.title ? (
-                    <p
-                      className="text-xs text-red-500 transition-opacity duration-150"
-                      role="alert"
-                    >
+                    <p className="text-xs text-rose-500" role="alert">
                       {fieldErrors.title}
                     </p>
                   ) : (
@@ -469,9 +467,9 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
               <div>
                 <label
                   htmlFor="edit-defect-description"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
                 >
-                  Description <span className="text-red-500">*</span>
+                  Description <span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   id="edit-defect-description"
@@ -479,26 +477,22 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                   onChange={(e) => setDescription(e.target.value)}
                   onBlur={() => handleBlur('description')}
                   placeholder="Detailed description of the defect..."
-                  rows={3}
+                  rows={4}
                   maxLength={MAX_DESCRIPTION}
                   disabled={loading}
                   tabIndex={2}
-                  className={`w-full px-3 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500
-                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                    transition-colors duration-150
+                  className={`w-full px-4 py-2.5 bg-white border rounded-xl resize-none text-slate-900 placeholder-slate-400
+                    transition-all duration-150
                     ${
                       fieldErrors.description && touched.description
-                        ? 'border-red-500'
-                        : 'border-gray-300 dark:border-gray-600'
+                        ? 'border-rose-300 ring-2 ring-rose-100'
+                        : 'border-slate-200 hover:border-slate-300 focus:border-slate-400 focus:ring-2 focus:ring-slate-100'
                     }
-                    disabled:opacity-60 disabled:cursor-not-allowed`}
+                    disabled:opacity-50 disabled:cursor-not-allowed`}
                 />
-                <div className="flex justify-between mt-1">
+                <div className="flex justify-between mt-1.5">
                   {fieldErrors.description && touched.description ? (
-                    <p
-                      className="text-xs text-red-500 transition-opacity duration-150"
-                      role="alert"
-                    >
+                    <p className="text-xs text-rose-500" role="alert">
                       {fieldErrors.description}
                     </p>
                   ) : (
@@ -509,12 +503,12 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
               </div>
 
               {/* ── Location + Standard Ref (side by side) ──────────── */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Location */}
                 <div>
                   <label
                     htmlFor="edit-defect-location"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
                   >
                     Location
                   </label>
@@ -528,22 +522,18 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                     maxLength={MAX_LOCATION}
                     disabled={loading}
                     tabIndex={3}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
-                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                      transition-colors duration-150
+                    className={`w-full px-4 py-2.5 bg-white border rounded-xl text-slate-900 placeholder-slate-400
+                      transition-all duration-150
                       ${
                         fieldErrors.location && touched.location
-                          ? 'border-red-500'
-                          : 'border-gray-300 dark:border-gray-600'
+                          ? 'border-rose-300 ring-2 ring-rose-100'
+                          : 'border-slate-200 hover:border-slate-300 focus:border-slate-400 focus:ring-2 focus:ring-slate-100'
                       }
-                      disabled:opacity-60 disabled:cursor-not-allowed`}
+                      disabled:opacity-50 disabled:cursor-not-allowed`}
                   />
-                  <div className="flex justify-between mt-1">
+                  <div className="flex justify-between mt-1.5">
                     {fieldErrors.location && touched.location ? (
-                      <p
-                        className="text-xs text-red-500 transition-opacity duration-150"
-                        role="alert"
-                      >
+                      <p className="text-xs text-rose-500" role="alert">
                         {fieldErrors.location}
                       </p>
                     ) : (
@@ -557,10 +547,10 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                 <div>
                   <label
                     htmlFor="edit-defect-standard-ref"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
                   >
                     Standard Reference{' '}
-                    <span className="text-gray-400 font-normal">(optional)</span>
+                    <span className="text-slate-400 font-normal normal-case">(optional)</span>
                   </label>
                   <input
                     id="edit-defect-standard-ref"
@@ -572,35 +562,23 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                     maxLength={MAX_STANDARD_REF}
                     disabled={loading}
                     tabIndex={4}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
-                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                      transition-colors duration-150
+                    className={`w-full px-4 py-2.5 bg-white border rounded-xl text-slate-900 placeholder-slate-400
+                      transition-all duration-150
                       ${
                         fieldErrors.standardReference && touched.standardReference
-                          ? 'border-red-500'
-                          : 'border-gray-300 dark:border-gray-600'
+                          ? 'border-rose-300 ring-2 ring-rose-100'
+                          : 'border-slate-200 hover:border-slate-300 focus:border-slate-400 focus:ring-2 focus:ring-slate-100'
                       }
-                      disabled:opacity-60 disabled:cursor-not-allowed`}
+                      disabled:opacity-50 disabled:cursor-not-allowed`}
                   />
-                  <div className="flex justify-between mt-1">
+                  <div className="flex justify-between mt-1.5">
                     {fieldErrors.standardReference && touched.standardReference ? (
-                      <p
-                        className="text-xs text-red-500 transition-opacity duration-150"
-                        role="alert"
-                      >
+                      <p className="text-xs text-rose-500" role="alert">
                         {fieldErrors.standardReference}
                       </p>
                     ) : standardReference ? (
-                      <p
-                        className={`text-xs transition-colors duration-200 ${
-                          standardRefValid
-                            ? 'text-green-500'
-                            : 'text-amber-500'
-                        }`}
-                      >
-                        {standardRefValid
-                          ? '✓ Valid format'
-                          : '⚠ Format: AS XXXX.X; X.X.X'}
+                      <p className={`text-xs ${standardRefValid ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {standardRefValid ? '✓ Valid format' : '⚠ Format: AS XXXX.X; X.X.X'}
                       </p>
                     ) : (
                       <span />
@@ -614,9 +592,9 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
               <div>
                 <label
                   htmlFor="edit-defect-severity"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
                 >
-                  Severity <span className="text-red-500">*</span>
+                  Severity <span className="text-rose-500">*</span>
                 </label>
                 <select
                   id="edit-defect-severity"
@@ -642,17 +620,17 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                   ))}
                 </select>
                 {fieldErrors.severity && touched.severity && (
-                  <p className="text-xs text-red-500 mt-1" role="alert">
+                  <p className="text-xs text-rose-500 mt-1.5" role="alert">
                     {fieldErrors.severity}
                   </p>
                 )}
               </div>
 
               {/* ── Images ──────────────────────────────────────────── */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <div className="border-t border-slate-100 pt-6">
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">
                   Images{' '}
-                  <span className="text-gray-400 font-normal">
+                  <span className="text-slate-400 font-normal normal-case">
                     ({existingImages.length} / {MAX_IMAGES})
                   </span>
                 </label>
@@ -665,10 +643,10 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
               </div>
 
               {/* ── Notes History (append-only) ─────────────────────── */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              <div className="border-t border-slate-100 pt-6">
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">
                   Notes History{' '}
-                  <span className="text-gray-400 font-normal">(append-only)</span>
+                  <span className="text-slate-400 font-normal normal-case">(append-only)</span>
                 </label>
 
                 {/* History list */}
@@ -677,24 +655,24 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                     {notesHistory.map((entry, idx) => (
                       <div
                         key={idx}
-                        className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
+                        className="bg-slate-50 rounded-xl p-3 border border-slate-100"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                          <span className="text-xs font-medium text-slate-600">
                             {entry.author}
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-[10px] text-slate-400">
                             {new Date(entry.timestamp).toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                        <p className="text-sm text-slate-700 whitespace-pre-wrap">
                           {entry.text}
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400 mb-4 italic">
+                  <p className="text-sm text-slate-400 mb-4 italic">
                     No notes yet.
                   </p>
                 )}
@@ -703,7 +681,7 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                 <div>
                   <label
                     htmlFor="edit-defect-new-note"
-                    className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                    className="block text-xs font-medium text-slate-500 mb-1.5"
                   >
                     Add a note
                   </label>
@@ -716,7 +694,7 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                     maxLength={MAX_NOTE_TEXT}
                     disabled={loading}
                     tabIndex={6}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl resize-none text-slate-900 placeholder-slate-400 transition-all duration-150 hover:border-slate-300 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <CharCounter current={newNoteText.length} max={MAX_NOTE_TEXT} className="mt-1 text-right" />
                 </div>
@@ -724,13 +702,13 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
             </div>
 
             {/* ── Footer / Actions ──────────────────────────────────── */}
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl">
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={loading}
                 tabIndex={7}
-                className="px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
@@ -738,7 +716,7 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
                 type="submit"
                 disabled={loading}
                 tabIndex={8}
-                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 min-w-[140px] justify-center"
+                className="px-5 py-2.5 text-sm font-medium text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 min-w-[140px] justify-center"
               >
                 {loading ? (
                   <ModalSpinner size="sm" label="Saving..." />
