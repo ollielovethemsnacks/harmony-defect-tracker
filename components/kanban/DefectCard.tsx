@@ -5,6 +5,7 @@ import { Defect, DefectStatus } from '@/types';
 
 interface DefectCardProps {
   defect: Defect;
+  onClick?: (defect: Defect) => void;
 }
 
 const statusColors: Record<DefectStatus, string> = {
@@ -13,7 +14,7 @@ const statusColors: Record<DefectStatus, string> = {
   DONE: 'bg-green-100 text-green-800',
 };
 
-export function DefectCard({ defect }: DefectCardProps) {
+export function DefectCard({ defect, onClick }: DefectCardProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: defect.id,
   });
@@ -22,14 +23,20 @@ export function DefectCard({ defect }: DefectCardProps) {
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick(defect);
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
-      className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-move hover:shadow-md transition-shadow"
-    >
+      onClick={handleClick}
+      className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
       <div className="flex items-start justify-between mb-2">
         <span className="text-xs font-mono text-gray-500">{defect.defectNumber}</span>
         <span className={`text-xs px-2 py-1 rounded-full ${statusColors[defect.status]}`}>

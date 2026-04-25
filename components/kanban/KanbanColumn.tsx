@@ -19,9 +19,10 @@ const columnColors: Record<DefectStatus, string> = {
 interface KanbanColumnProps {
   status: DefectStatus;
   defects: Defect[];
+  onDefectClick?: (defect: Defect) => void;
 }
 
-export function KanbanColumn({ status, defects }: KanbanColumnProps) {
+export function KanbanColumn({ status, defects, onDefectClick }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({ id: status });
 
   return (
@@ -35,7 +36,7 @@ export function KanbanColumn({ status, defects }: KanbanColumnProps) {
       </h2>
       <div className="space-y-3">
         {defects.map((defect) => (
-          <DefectCard key={defect.id} defect={defect} />
+          <DefectCard key={defect.id} defect={defect} onClick={onDefectClick} />
         ))}
       </div>
     </div>
