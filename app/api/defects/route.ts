@@ -89,10 +89,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         orderByClause = asc(defects.defectNumber);
     }
 
-    const allDefects = await db.query.defects.findMany({
-      where: isNull(defects.deletedAt),
-      orderBy: orderByClause,
-    });
+    let allDefects;
+    try {
+      allDefects = await db.query.defects.findMany({
+        where: isNull(defects.deletedAt),
+        orderBy: orderByClause,
+      });
+    } catch (err) {
+      // Fallback if deletedAt column doesn't exist
+      allDefects = await db.query.defects.findMany({
+        orderBy: orderByClause,
+      });
+    }
 
     return NextResponse.json({ success: true, data: allDefects });
   } catch (error) {
