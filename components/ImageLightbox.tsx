@@ -9,6 +9,7 @@ interface ImageLightboxProps {
   onClose: () => void;
   onNext: () => void;
   onPrev: () => void;
+  onGoTo?: (index: number) => void;
 }
 
 export function ImageLightbox({
@@ -18,6 +19,7 @@ export function ImageLightbox({
   onClose,
   onNext,
   onPrev,
+  onGoTo,
 }: ImageLightboxProps) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -157,10 +159,10 @@ export function ImageLightbox({
               key={idx}
               onClick={(e) => {
                 e.stopPropagation();
-                // Navigate to this image — parent manages currentIndex
+                onGoTo?.(idx);
               }}
               className={`flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded overflow-hidden border-2 transition-colors min-w-[44px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
-                idx === currentIndex ? 'border-white' : 'border-transparent opacity-60'
+                idx === currentIndex ? 'border-white' : 'border-transparent opacity-60 hover:opacity-80'
               }`}
               aria-label={`Go to image ${idx + 1}`}
               aria-current={idx === currentIndex ? 'true' : undefined}
