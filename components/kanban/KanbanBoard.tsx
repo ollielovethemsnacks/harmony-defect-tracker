@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { DndContext, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { KanbanColumn } from './KanbanColumn';
 import { DefectDetailModal } from './DefectDetailModal';
 import { CreateDefectModal } from './CreateDefectModal';
 import { EditDefectModal } from './EditDefectModal';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { Defect, DefectStatus, SortField, SortDirection } from '@/types';
+import { DefectCard } from './DefectCard';
 
 const COLUMNS: DefectStatus[] = ['TODO', 'IN_PROGRESS', 'DONE'];
 
@@ -35,6 +36,7 @@ export function KanbanBoard() {
   const [loading, setLoading] = useState(true);
   const [sortPreferences, setSortPreferences] = useState<Record<DefectStatus, { field: SortField; direction: SortDirection }>>(defaultSortPreferences);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [activeDragDefect, setActiveDragDefect] = useState<Defect | null>(null);
   
   // Mobile tab state
   const [activeMobileTab, setActiveMobileTab] = useState<DefectStatus>('TODO');
@@ -189,12 +191,16 @@ export function KanbanBoard() {
   }, [sortPreferences]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveDragId(event.active.id as string);
+    const defectId = event.active.id as string;
+    const defect = defects.find((d) => d.id === defectId);
+    setActiveDragId(defectId);
+    setActiveDragDefect(defect || null);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDragId(null);
+    setActiveDragDefect(null);
     
     if (!over) return;
 
@@ -295,6 +301,7 @@ export function KanbanBoard() {
               currentSort={sortPreferences[status]}
               onDefectClick={handleDefectClick}
               onSortChange={handleSortChange}
+              activeDefectId={activeDragId || undefined}
             />
           ))}
         </div>
@@ -307,8 +314,24 @@ export function KanbanBoard() {
             currentSort={sortPreferences[activeMobileTab]}
             onDefectClick={handleDefectClick}
             onSortChange={handleSortChange}
+            activeDefectId={activeDragId || undefined}
           />
         </div>
+
+        {/* DragOverlay - renders the floating dragged item */}
+        <DragOverlay dropAnimation={{
+          duration: 200,
+          easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+        }}>
+          {activeDragDefect ? (
+            <div className="transform rotate-2 scale-105">
+              <DefectCard 
+                defect={activeDragDefect} 
+                isOverlay 
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
 
       {/* Modals */}

@@ -6,6 +6,7 @@ import { Defect, DefectStatus } from '@/types';
 interface DefectCardProps {
   defect: Defect;
   onClick?: (defect: Defect) => void;
+  isOverlay?: boolean;
 }
 
 const statusColors: Record<DefectStatus, string> = {
@@ -14,13 +15,20 @@ const statusColors: Record<DefectStatus, string> = {
   DONE: 'bg-green-100 text-green-800',
 };
 
-export function DefectCard({ defect, onClick }: DefectCardProps) {
+export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: defect.id,
+    disabled: isOverlay, // Disable dragging on the overlay copy
   });
 
-  // When using DragOverlay, we don't need transform on the original element
-  // The DragOverlay renders the floating preview separately
+  // Visual states for drag interactions
+  const dragStateClasses = isOverlay
+    ? 'shadow-2xl ring-2 ring-blue-400 ring-opacity-50 cursor-grabbing'
+    : isDragging
+    ? 'opacity-40 grayscale shadow-inner'
+    : 'hover:shadow-md';
+
+  const cursorClass = isOverlay ? 'cursor-grabbing' : 'cursor-auto';
 
   const handleClick = () => {
     if (onClick) {
@@ -31,15 +39,19 @@ export function DefectCard({ defect, onClick }: DefectCardProps) {
   return (
     <div
       ref={setNodeRef}
-
       {...attributes}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow relative w-full overflow-hidden touch-manipulation"
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all relative w-full overflow-hidden touch-manipulation ${dragStateClasses} ${cursorClass}`}
+      style={isOverlay ? { transform: 'rotate(2deg)' } : undefined}
     >
       {/* Drag handle - only this area initiates drag */}
       {/* Hidden on mobile since drag-and-drop isn't supported on touch devices */}
       <div
         {...listeners}
-        className="hidden sm:flex absolute top-2 right-2 p-2 sm:p-1.5 rounded cursor-grab hover:bg-gray-100 active:cursor-grabbing text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] items-center justify-center sm:min-w-0 sm:min-h-0"
+        className={`hidden sm:flex absolute top-2 right-2 p-2 sm:p-1.5 rounded text-gray-400 hover:text-gray-600 z-10 min-w-[44px] min-h-[44px] items-center justify-center sm:min-w-0 sm:min-h-0 ${
+          isOverlay 
+            ? 'cursor-grabbing bg-blue-50' 
+            : 'cursor-grab hover:bg-gray-100 active:cursor-grabbing'
+        }`}
         title="Drag to move"
       >
         {/* Responsive icon sizing: larger on mobile for touch */}
