@@ -298,7 +298,7 @@ export function KanbanBoard() {
               id: selectedDefect.id,
               defectNumber: selectedDefect.defectNumber,
               title: selectedDefect.title,
-              location: selectedDefect.location,
+              location: selectedDefect.location ?? '',
             }}
             onDefectDeleted={handleDeleteDefect}
           />

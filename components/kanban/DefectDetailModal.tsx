@@ -240,14 +240,16 @@ export function DefectDetailModal({ defect, isOpen, onClose, onStatusChange, onE
   };
 
   const nextImage = () => {
-    if (defect?.images) {
-      setCurrentImageIndex((prev) => (prev + 1) % defect.images.length);
+    const images = defect?.images;
+    if (images && images.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }
   };
 
   const prevImage = () => {
-    if (defect?.images) {
-      setCurrentImageIndex((prev) => (prev - 1 + defect.images.length) % defect.images.length);
+    const images = defect?.images;
+    if (images && images.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
     }
   };
 

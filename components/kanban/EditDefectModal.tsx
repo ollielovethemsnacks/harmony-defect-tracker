@@ -100,8 +100,8 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
   // ─── Form state (initialised from defect) ────────────────────────────────
   // Initialize state from defect when modal opens (using lazy initialization pattern)
   const [title, setTitle] = useState(() => defect.title);
-  const [description, setDescription] = useState(() => defect.description);
-  const [location, setLocation] = useState(() => defect.location);
+  const [description, setDescription] = useState(() => defect.description ?? '');
+  const [location, setLocation] = useState(() => defect.location ?? '');
   const [standardReference, setStandardReference] = useState(() =>
     defect.standardReference || '',
   );
@@ -141,8 +141,8 @@ export function EditDefectModal({ defect, isOpen, onClose, onUpdate }: EditDefec
 
   const resetForm = useCallback(() => {
     setTitle(defect.title);
-    setDescription(defect.description);
-    setLocation(defect.location);
+    setDescription(defect.description ?? '');
+    setLocation(defect.location ?? '');
     setStandardReference(defect.standardReference || '');
     setSeverity(defect.severity ?? null);
     setExistingImages(defect.images || []);

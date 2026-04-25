@@ -78,7 +78,7 @@ export function DefectDetailModal({ defect, isOpen, onClose, onUpdate }: DefectD
   const handleDeleteImage = async (imageIndex: number) => {
     if (!defect) return;
     
-    const updatedImages = defect.images.filter((_, i) => i !== imageIndex);
+    const updatedImages = (defect.images || []).filter((_, i) => i !== imageIndex);
     
     try {
       const res = await fetch(`/api/defects/${defect.id}`, {
@@ -148,7 +148,7 @@ export function DefectDetailModal({ defect, isOpen, onClose, onUpdate }: DefectD
                 : 'text-gray-600 hover:text-gray-800'
               }`}
           >
-            Images {defect.images?.length > 0 && `(${defect.images.length})`}
+            Images {(defect.images?.length || 0) > 0 && `(${defect.images?.length || 0})`}
           </button>
           <button
             onClick={() => setActiveTab('comments')}

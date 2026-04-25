@@ -81,7 +81,7 @@ export function DefectCard({ defect, onClick }: DefectCardProps) {
         {/* Footer with location and image count */}
         <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500">
           <span className="truncate max-w-[70%]">📍 {defect.location}</span>
-          {defect.images?.length > 0 && <span>📷 {defect.images.length}</span>}
+          {(defect.images?.length || 0) > 0 && <span>📷 {defect.images?.length || 0}</span>}
         </div>
       </div>
     </div>
