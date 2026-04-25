@@ -23,7 +23,7 @@ export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
 
   // Visual states for drag interactions
   const dragStateClasses = isOverlay
-    ? 'shadow-2xl ring-2 ring-blue-400 ring-opacity-50 cursor-grabbing'
+    ? 'shadow-2xl ring-2 ring-blue-400 ring-opacity-50 cursor-grabbing rotate-2 scale-105'
     : isDragging
     ? 'opacity-40 grayscale shadow-inner'
     : 'hover:shadow-md';
@@ -41,7 +41,7 @@ export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
       ref={setNodeRef}
       {...attributes}
       className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all relative w-full overflow-hidden touch-manipulation ${dragStateClasses} ${cursorClass}`}
-      style={isOverlay ? { transform: 'rotate(2deg)' } : undefined}
+      style={isOverlay ? { width: '320px' } : undefined}
     >
       {/* Drag handle - only this area initiates drag */}
       {/* Hidden on mobile since drag-and-drop isn't supported on touch devices */}

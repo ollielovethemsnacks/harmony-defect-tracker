@@ -326,12 +326,10 @@ export function KanbanBoard() {
           }}
         >
           {activeDragDefect ? (
-            <div className="w-[320px] lg:w-[360px] rotate-2 scale-105 cursor-grabbing">
-              <DefectCard 
-                defect={activeDragDefect} 
-                isOverlay 
-              />
-            </div>
+            <DefectCard 
+              defect={activeDragDefect} 
+              isOverlay 
+            />
           ) : null}
         </DragOverlay>
       </DndContext>
