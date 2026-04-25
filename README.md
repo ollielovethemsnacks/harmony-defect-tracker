@@ -102,3 +102,4 @@ harmony-defect-tracker/
 ## License
 
 Private - For 6 Harmony Street building inspection use only.
+# CI Trigger
