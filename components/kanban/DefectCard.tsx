@@ -41,7 +41,7 @@ export function DefectCard({ defect, onClick, isOverlay }: DefectCardProps) {
       ref={setNodeRef}
       {...attributes}
       className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all relative overflow-hidden touch-manipulation ${dragStateClasses} ${cursorClass}`}
-      style={{ width: isOverlay ? '320px' : '100%' }}
+      style={isOverlay ? { width: '320px' } : undefined}
     >
       {/* Drag handle - only this area initiates drag */}
       {/* Hidden on mobile since drag-and-drop isn't supported on touch devices */}
