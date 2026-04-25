@@ -18,11 +18,26 @@ const defaultSortPreferences: Record<DefectStatus, { field: SortField; direction
   DONE: { field: 'defectNumber', direction: 'asc' },
 };
 
+const columnTitles: Record<DefectStatus, string> = {
+  TODO: 'To Do',
+  IN_PROGRESS: 'In Progress',
+  DONE: 'Done',
+};
+
+const columnColors: Record<DefectStatus, { bg: string; text: string; border: string }> = {
+  TODO: { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300' },
+  IN_PROGRESS: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300' },
+  DONE: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-300' },
+};
+
 export function KanbanBoard() {
   const [defects, setDefects] = useState<Defect[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortPreferences, setSortPreferences] = useState<Record<DefectStatus, { field: SortField; direction: SortDirection }>>(defaultSortPreferences);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  
+  // Mobile tab state
+  const [activeMobileTab, setActiveMobileTab] = useState<DefectStatus>('TODO');
   
   // Modal states
   const [selectedDefect, setSelectedDefect] = useState<Defect | null>(null);
@@ -239,11 +254,39 @@ export function KanbanBoard() {
           + New Defect
         </button>
       </div>
+      {/* Mobile Tab Navigation - Only visible on small screens */}
+      <div className="lg:hidden px-4 mb-2">
+        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+          {COLUMNS.map((status) => {
+            const count = defects.filter((d) => d.status === status).length;
+            const colors = columnColors[status];
+            const isActive = activeMobileTab === status;
+            return (
+              <button
+                key={status}
+                onClick={() => setActiveMobileTab(status)}
+                className={`flex-1 px-2 py-2 rounded-md text-xs font-medium transition-all ${
+                  isActive
+                    ? `${colors.bg} ${colors.text} shadow-sm`
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <span className="block truncate">{columnTitles[status]}</span>
+                <span className={`text-[10px] ${isActive ? colors.text : 'text-gray-500'}`}>
+                  {count} items
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <DndContext 
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex flex-col lg:flex-row gap-4 p-4 min-h-screen">
+        {/* Desktop: Show all columns side by side */}
+        <div className="hidden lg:flex lg:flex-row gap-4 p-4 min-h-screen">
           {COLUMNS.map((status) => (
             <KanbanColumn
               key={status}
@@ -254,6 +297,17 @@ export function KanbanBoard() {
               onSortChange={handleSortChange}
             />
           ))}
+        </div>
+
+        {/* Mobile: Show only active tab */}
+        <div className="lg:hidden p-4">
+          <KanbanColumn
+            status={activeMobileTab}
+            defects={getSortedDefects(activeMobileTab)}
+            currentSort={sortPreferences[activeMobileTab]}
+            onDefectClick={handleDefectClick}
+            onSortChange={handleSortChange}
+          />
         </div>
       </DndContext>
 
