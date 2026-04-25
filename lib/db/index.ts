@@ -11,7 +11,9 @@ if (!databaseUrl) {
 
 const sql = databaseUrl ? neon(databaseUrl) : null;
 // Use type assertion to ensure db is always typed as drizzle instance
-export const db = sql ? drizzle(sql, { schema }) : (null as unknown as ReturnType<typeof drizzle>);
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+type DrizzleInstance = ReturnType<typeof drizzle<typeof schema, 'public'>>;
+export const db = (sql ? drizzle(sql, { schema }) : null) as DrizzleInstance;
 
 // Export getDb for compatibility with existing code
 export function getDb() {
