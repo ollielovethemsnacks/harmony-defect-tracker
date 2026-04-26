@@ -11,10 +11,10 @@ const columnTitles: Record<DefectStatus, string> = {
   DONE: 'Done',
 };
 
-const columnColors: Record<DefectStatus, { bg: string; border: string; indicator: string; text: string }> = {
-  TODO: { bg: 'bg-amber-50', border: 'border-amber-200', indicator: 'bg-amber-500', text: 'text-amber-800' },
-  IN_PROGRESS: { bg: 'bg-blue-50', border: 'border-blue-200', indicator: 'bg-blue-500', text: 'text-blue-800' },
-  DONE: { bg: 'bg-emerald-50', border: 'border-emerald-200', indicator: 'bg-emerald-500', text: 'text-emerald-800' },
+const columnColors: Record<DefectStatus, { bg: string; border: string; indicator: string; text: string; headerBg: string; headerBorder: string }> = {
+  TODO: { bg: 'bg-[#fffbeb]', border: 'border-amber-200', indicator: 'bg-amber-500', text: 'text-amber-900', headerBg: 'bg-white', headerBorder: 'border-t-amber-500' },
+  IN_PROGRESS: { bg: 'bg-[#eff6ff]', border: 'border-blue-200', indicator: 'bg-blue-500', text: 'text-blue-900', headerBg: 'bg-white', headerBorder: 'border-t-blue-500' },
+  DONE: { bg: 'bg-[#ecfdf5]', border: 'border-emerald-200', indicator: 'bg-emerald-500', text: 'text-emerald-900', headerBg: 'bg-white', headerBorder: 'border-t-emerald-500' },
 };
 
 interface KanbanColumnProps {
@@ -37,14 +37,14 @@ export function KanbanColumn({ status, defects, currentSort, onDefectClick, onSo
         isOver ? 'ring-2 ring-slate-400 ring-offset-2' : ''
       } p-4 flex flex-col h-auto lg:h-auto mb-4 lg:mb-0 transition-all`}
     >
-      {/* Column header - minimalist */}
-      <div className="flex items-center justify-between mb-4 flex-shrink-0">
+      {/* Column header - high contrast */}
+      <div className={`flex items-center justify-between mb-4 flex-shrink-0 p-3 bg-white rounded-xl border border-slate-200 shadow-sm`}>
         <div className="flex items-center gap-2.5">
-          <span className={`w-2 h-2 rounded-full ${colors.indicator}`} />
+          <span className={`w-2.5 h-2.5 rounded-full ${colors.indicator}`} />
           <h2 className="font-semibold text-sm text-slate-900">
             {columnTitles[status]}
           </h2>
-          <span className="px-2 py-0.5 bg-white rounded-full text-xs font-medium text-slate-700 border border-slate-300">
+          <span className="px-2 py-0.5 bg-slate-100 rounded-full text-xs font-semibold text-slate-800">
             {defects.length}
           </span>
         </div>
